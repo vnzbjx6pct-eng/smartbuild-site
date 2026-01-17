@@ -18,6 +18,10 @@ export interface Product {
     // Logistics (Optional - used for Delivery Eligibility)
     weightKg?: number;          // Single unit weight
     volumeM3?: number;          // Single unit volume
+    lengthCm?: number;          // New: Side 1
+    widthCm?: number;           // New: Side 2
+    heightCm?: number;          // New: Side 3
+    deliveryAllowedWolt?: boolean; // New: Manual override
     bulky?: boolean;            // True if dimensions exceed standard courier limits (e.g. > 1.2m)
     fragile?: boolean;          // True if requires special handling (glass, ceramics)
     deliveryClass?: "small" | "medium" | "heavy" | "oversize"; // Logistics class
@@ -40,4 +44,160 @@ export interface Product {
     status?: ValidationStatus;
     qualityScore?: number;
     rejectionReasons?: string[];
+}
+
+export interface Store {
+    id: string;
+    name: string;
+    brand_name: string;
+    city: string;
+    address: string;
+    contact_email: string;
+    phone: string;
+    status: 'active' | 'pending' | 'disabled';
+}
+
+export type StoreRole = 'partner_admin' | 'partner_manager' | 'platform_admin';
+
+export interface StoreUser {
+    user_id: string;
+    store_id: string;
+    role: StoreRole;
+}
+
+export interface StoreProduct {
+    id: string;
+    store_id: string;
+    product_master_id?: string;
+    name_override_et?: string;
+    name_override_ru?: string;
+    brand: string;
+    sku?: string;
+    ean?: string;
+    price: number;
+    currency: string;
+    stock_status: 'in_stock' | 'out_of_stock' | 'limited' | 'preorder';
+    stock_qty?: number;
+
+    // Logistics
+    weight_kg?: number;
+    length_cm?: number;
+    width_cm?: number;
+    height_cm?: number;
+    hazmat: boolean;
+    missing_dimensions: boolean;
+
+    // Toggles
+    delivery_allowed_wolt: boolean;
+    pickup_allowed: boolean;
+    store_delivery_allowed: boolean;
+
+    image_url?: string;
+    updated_at: string;
+}
+
+export interface ImportJob {
+    id: string;
+    store_id: string;
+    status: 'uploaded' | 'previewed' | 'applied' | 'failed';
+    file_name: string;
+    mapping_json: Record<string, string>;
+    summary_json: {
+        total_rows?: number;
+        valid_rows?: number;
+        error_rows?: number;
+        created_count?: number;
+        updated_count?: number;
+    };
+    errors_json: Array<{ row: number; error: string; data?: any }>;
+    created_at: string;
+}
+
+export interface StoreDeliverySettings {
+    store_id: string;
+    pickup_enabled: boolean;
+    wolt_enabled: boolean;
+    store_delivery_enabled: boolean;
+    cities: string[];
+    prep_time_min: number;
+    partial_delivery_enabled: boolean;
+    store_delivery_rules_json: {
+        min_order_eur?: number;
+        fee_eur?: number;
+        free_shipping_from_eur?: number;
+    };
+}
+
+// User Dashboard Types
+export interface UserProfile {
+    id: string; // auth.uid
+    full_name: string;
+    phone: string;
+    default_city: string;
+}
+
+export type OrderStatus = 'draft' | 'submitted' | 'confirmed' | 'cancelled' | 'completed';
+export type PaymentStatus = 'unpaid' | 'paid' | 'refunded';
+
+export interface Order {
+    id: string;
+    user_id: string;
+    status: OrderStatus;
+    payment_status: PaymentStatus;
+    currency: string;
+    subtotal: number;
+    delivery_fee: number;
+    total: number;
+    city: string;
+    address_line: string;
+    phone: string;
+    notes?: string;
+    created_at: string;
+    // Relations
+    items?: OrderItem[];
+    shipments?: Shipment[];
+}
+
+export interface OrderItem {
+    id: string;
+    order_id: string;
+    store_id?: string;
+    product_id: string;
+    name: string;
+    brand?: string;
+    qty: number;
+    unit?: string;
+    price: number;
+    line_total: number;
+    image_url?: string;
+    shipment_id?: string;
+}
+
+export type ShipmentType = 'wolt' | 'store_delivery' | 'pickup';
+export type ShipmentStatus = 'pending' | 'quoted' | 'accepted' | 'preparing' | 'dispatched' | 'delivered' | 'failed' | 'cancelled';
+
+export interface Shipment {
+    id: string;
+    order_id: string;
+    type: ShipmentType;
+    status: ShipmentStatus;
+    store_id?: string;
+    city?: string;
+    address_line?: string;
+    eta_minutes?: number;
+    fee: number;
+    provider?: string;
+    provider_reference?: string;
+    status_reason_code?: string;
+    created_at: string;
+    // Relations
+    events?: ShipmentEvent[];
+}
+
+export interface ShipmentEvent {
+    id: string;
+    shipment_id: string;
+    event_status: string;
+    message?: string;
+    created_at: string;
 }

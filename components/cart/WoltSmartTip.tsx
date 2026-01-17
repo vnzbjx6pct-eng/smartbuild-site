@@ -40,7 +40,7 @@ export default function WoltSmartTip({ suggestion, items, onApply, onUndo, city 
         }).filter(i => i.qty > 0);
 
         const check = checkDeliveryEligibility(hypotheticalItems, city);
-        setIsEligible(check.eligible);
+        setIsEligible(check.state === 'eligible');
 
     }, [previewQty, items, suggestion, isRemove, city]);
 

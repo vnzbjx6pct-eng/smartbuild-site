@@ -23,6 +23,7 @@ const RAW_PRODUCTS: Product[] = [
         unitKey: "unit_pcs",
         image: "/images/products/gypsum-sheet.png",
         weightKg: 25,
+        lengthCm: 250, widthCm: 120, heightCm: 1.25, // Too big for Wolt
         volumeM3: 0.039,
         bulky: true, // 1200x2500 is very large
         deliveryClass: "oversize",
@@ -47,6 +48,7 @@ const RAW_PRODUCTS: Product[] = [
         unitKey: "unit_pcs",
         image: "/images/products/osb-sheet.png",
         weightKg: 22,
+        lengthCm: 250, widthCm: 125, heightCm: 1.2, // Too big for Wolt
         volumeM3: 0.037,
         bulky: true,
         deliveryClass: "oversize",
@@ -70,6 +72,7 @@ const RAW_PRODUCTS: Product[] = [
         unitKey: "unit_pcs",
         image: "/images/products/fibo-block.png",
         weightKg: 6,
+        lengthCm: 20, widthCm: 20, heightCm: 30, // Fits
         volumeM3: 0.005,
         bulky: false,
         deliveryClass: "medium",
@@ -94,6 +97,7 @@ const RAW_PRODUCTS: Product[] = [
         unitKey: "unit_pack",
         image: "/images/products/paroc-slabs.png",
         weightKg: 15,
+        lengthCm: 120, widthCm: 60, heightCm: 40, // Too big (120 > 100)
         volumeM3: 0.3, // Large volume
         bulky: true,
         deliveryClass: "oversize",
@@ -117,7 +121,8 @@ const RAW_PRODUCTS: Product[] = [
         unit: "kott",
         unitKey: "unit_bag",
         image: "/images/products/cement-bag.png",
-        weightKg: 35, // PROMPT REQUIREMENT: 35kg -> Heavy
+        weightKg: 35,
+        lengthCm: 50, widthCm: 30, heightCm: 15,
         volumeM3: 0.02,
         bulky: false,
         deliveryClass: "heavy",
@@ -139,6 +144,7 @@ const RAW_PRODUCTS: Product[] = [
         unitKey: "unit_pcs",
         image: "/images/products/timber-plank.png",
         weightKg: 6,
+        lengthCm: 300, widthCm: 9.5, heightCm: 4.5, // Too Long
         volumeM3: 0.012,
         bulky: true, // Long > 1.2m
         deliveryClass: "oversize",
@@ -161,6 +167,7 @@ const RAW_PRODUCTS: Product[] = [
         unitKey: "unit_pack",
         image: "/images/products/screws.png",
         weightKg: 1.5,
+        lengthCm: 15, widthCm: 10, heightCm: 8, // Fits perfectly
         volumeM3: 0.002,
         bulky: false,
         deliveryClass: "small", // ELIGIBLE
@@ -182,6 +189,7 @@ const RAW_PRODUCTS: Product[] = [
         unitKey: "unit_pcs",
         image: "/images/products/tape.png",
         weightKg: 0.3,
+        lengthCm: 8, widthCm: 8, heightCm: 4, // Fits perfectly
         volumeM3: 0.001,
         bulky: false,
         deliveryClass: "small", // ELIGIBLE
@@ -202,6 +210,8 @@ const RAW_PRODUCTS: Product[] = [
         unitKey: "unit_pack",
         image: "/images/products/tile-retro.png",
         weightKg: 8,
+        // Dimensions MISSING to test "Unknown Dimensions" rule
+        // lengthCm: 20, widthCm: 20, heightCm: 5,
         volumeM3: 0.015,
         bulky: false,
         fragile: true, // INELIGIBLE

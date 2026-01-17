@@ -302,6 +302,62 @@ export const ET_DICTIONARY = {
         adjust_not_yet: "Veel mitte",
         adjust_hint_apply: "Kui rakendad, saad tellida Woltiga.",
         adjust_success: "Muudatus tehtud — Wolt on nüüd saadaval"
+    },
+    account: {
+        nav_overview: "Ülevaade",
+        nav_orders: "Tellimused",
+        nav_settings: "Seaded",
+        nav_logout: "Logi välja",
+        welcome_back: "Tere tulemast tagasi!",
+        no_orders: "Tellimuste ajalugu on tühi.",
+        latest_order: "Viimane tellimus",
+        view_details: "Vaata detaile",
+        order_nr: "TELLIMUS #",
+        status_completed: "Täidetud",
+        status_cancelled: "Tühistatud",
+        status_submitted: "Esitatud",
+        status_draft: "Mustand",
+        save: "Salvesta",
+        saved: "Salvestatud!",
+        full_name: "Täisnimi",
+        phone: "Telefon",
+        default_city: "Vaikimisi Linn",
+        back_to_orders: "Tagasi tellimuste juurde",
+        order_summary: "Kokkuvõte",
+        delivery_info: "Tarne info",
+        goods: "Kaubad",
+        delivery: "Tarne",
+        total: "Kokku",
+        split_shipment: "Osaline tarne",
+        items_in_package: "Paki sisu",
+        dev_tools: "Arendus",
+        create_test_order: "+ Test Tellimus",
+
+
+
+        shipment_pending: "Loodud",
+        shipment_quoted: "Arvutatud",
+        shipment_accepted: "Vastuvõetud",
+        shipment_preparing: "Koostame tellimust",
+        shipment_dispatched: "Teel",
+        shipment_delivered: "Tarnitud",
+        shipment_failed: "Tarne ebaõnnestus",
+        shipment_cancelled: "Tühistatud",
+
+        // Timeline Messages
+        timeline_pending: "Tellimus on töösse võetud.",
+        timeline_quoted: "Tarne hind on arvutatud.",
+        timeline_accepted: "Tarne on kinnitatud.",
+        timeline_preparing: "Koostame tooteid ja valmistame ette kullerile.",
+        timeline_dispatched: "Kuller võttis tellimuse peale.",
+        timeline_delivered: "Tellimus on tarnitud. Aitäh!",
+        timeline_failed: "Tarne ebaõnnestus. Proovi uuesti või vali teine tarneviis.",
+        timeline_cancelled: "Tarne tühistati.",
+
+        type_wolt: "Wolt kuller",
+        type_store_delivery: "Poe tarne",
+        type_pickup: "Ise järele",
+        repeat_order: "Korda tellimust"
     }
 };
 
@@ -607,5 +663,61 @@ export const RU_DICTIONARY: Dictionary = {
         adjust_not_yet: "Пока нет",
         adjust_hint_apply: "Если применить, можно заказать Wolt.",
         adjust_success: "Готово — Wolt теперь доступен"
+    },
+    account: {
+        nav_overview: "Обзор",
+        nav_orders: "Заказы",
+        nav_settings: "Настройки",
+        nav_logout: "Выйти",
+        welcome_back: "С возвращением!",
+        no_orders: "История заказов пуста.",
+        latest_order: "Последний заказ",
+        view_details: "Подробнее",
+        order_nr: "ЗАКАЗ #",
+        status_completed: "Выполнен",
+        status_cancelled: "Отменен",
+        status_submitted: "Отправлен",
+        status_draft: "Черновик",
+        save: "Сохранить",
+        saved: "Сохранено!",
+        full_name: "Полное имя",
+        phone: "Телефон",
+        default_city: "Город по умолчанию",
+        back_to_orders: "Назад к заказам",
+        order_summary: "Сводка",
+        delivery_info: "Информация о доставке",
+        goods: "Товары",
+        delivery: "Доставка",
+        total: "Итого",
+        split_shipment: "Частичная доставка",
+        items_in_package: "Содержимое посылки",
+        dev_tools: "Разработка",
+        create_test_order: "+ Тест Заказ",
+
+
+
+        shipment_pending: "Создано",
+        shipment_quoted: "Рассчитано",
+        shipment_accepted: "Принято",
+        shipment_preparing: "Собираем заказ",
+        shipment_dispatched: "В пути",
+        shipment_delivered: "Доставлено",
+        shipment_failed: "Ошибка доставки",
+        shipment_cancelled: "Отменено",
+
+        // Timeline Messages
+        timeline_pending: "Заказ принят в обработку.",
+        timeline_quoted: "Стоимость доставки рассчитана.",
+        timeline_accepted: "Доставка подтверждена.",
+        timeline_preparing: "Комплектуем товары и готовим к выдаче курьеру.",
+        timeline_dispatched: "Курьер забрал заказ.",
+        timeline_delivered: "Заказ доставлен. Спасибо!",
+        timeline_failed: "Не удалось доставить заказ. Попробуйте ещё раз или выберите другой способ.",
+        timeline_cancelled: "Доставка отменена.",
+
+        type_wolt: "Wolt курьер",
+        type_store_delivery: "Доставка магазина",
+        type_pickup: "Самовывоз",
+        repeat_order: "Повторить заказ"
     }
 };

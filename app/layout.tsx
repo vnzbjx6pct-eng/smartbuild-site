@@ -11,20 +11,30 @@ import { LanguageProvider } from "@/components/i18n/LanguageProvider";
 
 // Estonian Metadata
 export const metadata: Metadata = {
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://smartbuild.ee'),
     title: {
         default: "SmartBuild - Ehitusmaterjalide Hinnavõrdlus",
         template: "%s | SmartBuild Eesti"
     },
     description: "Eesti suurim ehitusmaterjalide hinnavõrdlus. Leia parim pakkumine Espakist, Bauhofist, K-Rautast ja mujalt. Säästa aega ja raha.",
-    keywords: ["ehitusmaterjalid", "ehitusmaterjalide hind", "hinnavõrdlus", "ehituspood", "bauhof", "k-rauta", "espak"],
+    keywords: ["ehitusmaterjalid", "ehitusmaterjalide hind", "hinnavõrdlus", "ehituspood", "bauhof", "k-rauta", "espak", "ehitus", "remont"],
+    authors: [{ name: "SmartBuild Eesti" }],
+    creator: "SmartBuild",
+    publisher: "SmartBuild",
+    robots: {
+        index: true,
+        follow: true,
+    },
     openGraph: {
         type: 'website',
         locale: 'et_EE',
         url: 'https://smartbuild.ee',
         siteName: 'SmartBuild Eesti',
+        title: "SmartBuild - Ehitusmaterjalide Hinnavõrdlus",
+        description: "Leia parim hind Espakist, Bauhofist, K-Rautast ja mujalt.",
         images: [
             {
-                url: '/og-image.jpg', // Placeholder
+                url: '/opengraph-image',
                 width: 1200,
                 height: 630,
                 alt: 'SmartBuild Ehitusmaterjalide Hinnavõrdlus',
@@ -33,6 +43,13 @@ export const metadata: Metadata = {
     },
     twitter: {
         card: 'summary_large_image',
+        title: "SmartBuild Eesti",
+        description: "Ehitusmaterjalide hinnavõrdlus. Säästa aega ja raha.",
+        images: ['/opengraph-image'],
+    },
+    icons: {
+        icon: '/favicon.ico',
+        apple: '/apple-icon.png',
     },
 };
 

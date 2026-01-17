@@ -66,15 +66,18 @@ export const PARNU_WAREHOUSE = {
 };
 
 export const DELIVERY_LIMITS = {
-    maxWeightKg: 20,          // Total Cart Limit
-    maxVolumeM3: 0.08,        // Total Cart Limit
-    itemMaxWeightKg: 10,      // Per Item Limit
-    itemMaxVolumeM3: 0.03,    // Per Item Limit
+    maxWeightKg: 20,          // Total Cart Limit (Strict 20kg)
+    maxVolumeM3: 0.06,        // Total Cart Limit (60L = 0.06m3)
+    itemMaxWeightKg: 20,      // Per Item Limit (implicitly constrained by total)
+    itemMaxVolumeM3: 0.06,    // Per Item Limit
+    maxSingleSideCm: 80,      // Max length for any side except longest? Or strict 80x80x100?
+    // Prompt: max_single_side_cm=80, max_longest_side_cm=100
+    maxLongestSideCm: 100,
     maxItems: 12,
     disallowBulky: true,
     disallowHazmat: true,
     disallowFragile: true,    // Strict rule
-    requireKnownLogistics: false,
+    requireKnownLogistics: true, // "unknown_dimensions_block=true"
     allowedCities: ["Pärnu", "Tallinn", "Tartu", "Narva"]
 };
 
@@ -89,63 +92,163 @@ export enum ResolutionCode {
     BULKY_ITEMS = "BULKY_ITEMS",
     FRAGILE_ITEMS = "FRAGILE_ITEMS",
     HAZMAT_ITEMS = "HAZMAT_ITEMS",
-    UNKNOWN_LOGISTICS = "UNKNOWN_LOGISTICS",
-    MISSING_DIMENSIONS_ASSUME_INELIGIBLE = "MISSING_DIMENSIONS_ASSUME_INELIGIBLE",
+    UNKNOWN_LOGISTICS = "UNKNOWN_LOGISTICS", // Generic unknown
+    MISSING_DIMENSIONS = "MISSING_DIMENSIONS", // Specific missing dims
+    MANUAL_BLOCK = "MANUAL_BLOCK", // deliveryAllowedWolt === false
 }
 
-// Helper to check eligibility (City aware)
-export function checkDeliveryEligibility<T extends { weightKg?: number; volumeM3?: number; bulky?: boolean; hazmat?: boolean; sensitive?: boolean; fragile?: boolean; deliveryClass?: string; qty: number; name: string }>(items: T[], city: string): EligibilityResult<T> {
+export interface WoltEligibility {
+    state: "eligible" | "partial" | "blocked";
+    reason_code: string | null; // Top level reason
+    reasons?: Array<{ code: string; message_key?: string }>;
+    totals: {
+        weight_kg: number;
+        volume_cm3: number;
+        longest_side_cm: number;
+        max_side_cm: number;
+    };
+    limits: typeof DELIVERY_LIMITS;
+    eligibleItems: Array<{ id?: string; sku?: string; qty: number }>; // Minimal item ref
+    ineligibleItems: Array<{ id?: string; reasons: string[] }>;
+}
+
+export function checkDeliveryEligibility<T extends { weightKg?: number; volumeM3?: number; lengthCm?: number; widthCm?: number; heightCm?: number; deliveryAllowedWolt?: boolean; bulky?: boolean; hazmat?: boolean; sensitive?: boolean; fragile?: boolean; deliveryClass?: string; qty: number; name: string; id?: string }>(items: T[], city: string): WoltEligibility {
+
+    // 1. Calculate Totals
+    let totalWeight = 0;
+    let totalVolume = 0;
+    let maxLongest = 0;
+    let maxSide = 0;
+
+    items.forEach(item => {
+        totalWeight += (item.weightKg || 0) * item.qty;
+        totalVolume += (item.volumeM3 || 0) * item.qty;
+
+        if (item.lengthCm && item.widthCm && item.heightCm) {
+            const sides = [item.lengthCm, item.widthCm, item.heightCm].sort((a, b) => b - a);
+            if (sides[0] > maxLongest) maxLongest = sides[0];
+            if (sides[1] > maxSide) maxSide = sides[1];
+        }
+    });
 
     const totals = {
-        totalWeightKg: items.reduce((s, i) => s + (i.weightKg || 1) * i.qty, 0),
-        totalVolumeM3: items.reduce((s, i) => s + (i.volumeM3 || 0.01) * i.qty, 0),
-        totalItems: items.reduce((s, i) => s + i.qty, 0)
+        weight_kg: totalWeight,
+        volume_cm3: totalVolume * 1000000, // m3 to cm3 if needed, or keep m3? Prompt said volume_cm3. 0.06m3 = 60000cm3
+        longest_side_cm: maxLongest,
+        max_side_cm: maxSide
     };
 
-    // CITY CHECK FIRST
+    // 2. City Check
     if (!DELIVERY_LIMITS.allowedCities.includes(city)) {
         return {
-            eligible: false,
-            reasons: [ResolutionCode.CITY_NOT_SUPPORTED],
-            totals: totals,
+            state: "blocked",
+            reason_code: ResolutionCode.CITY_NOT_SUPPORTED,
+            reasons: [{ code: ResolutionCode.CITY_NOT_SUPPORTED, message_key: "city_not_supported" }],
+            totals,
+            limits: DELIVERY_LIMITS,
             eligibleItems: [],
-            ineligibleItems: items.map(i => ({ item: i, originalQty: i.qty, reasons: [ResolutionCode.CITY_NOT_SUPPORTED] })),
-            eligibleTotals: { totalWeightKg: 0, totalVolumeM3: 0, totalItems: 0 },
-            ineligibleTotals: totals
+            ineligibleItems: items.map(i => ({ id: i.id, reasons: [ResolutionCode.CITY_NOT_SUPPORTED] }))
         };
     }
 
-    const split = splitCart(items);
+    // 3. Item Level Analysis (Split)
+    const splitResult = splitCart(items);
+
+    // 4. Cart Level Checks
+    const cartReasons: string[] = [];
+
+    // Check if TOTALS exceed limits (even if individual items are fine, the sum might be too heavy)
+    if (totalWeight > DELIVERY_LIMITS.maxWeightKg) cartReasons.push(ResolutionCode.CART_TOO_HEAVY);
+    if (totalVolume > DELIVERY_LIMITS.maxVolumeM3) cartReasons.push(ResolutionCode.CART_TOO_LARGE);
+    if (items.reduce((acc, i) => acc + i.qty, 0) > DELIVERY_LIMITS.maxItems) cartReasons.push(ResolutionCode.OVER_ITEMS);
+
+    // Determine State
+    let state: "eligible" | "partial" | "blocked" = "eligible";
+
+    // If cart limits exceeded -> Blocked (usually) or Partial if we assume splitting works for cart limits too?
+    // User logic: "If state=partial... split cart automatically". 
+    // Usually CART_TOO_HEAVY means the WHOLE order is too heavy. But maybe we can split?
+    // For now, if cart global limits are exceeded, it's often BLOCKED unless we split into multiple Wolt orders (not supported yet).
+    // Let's assume CART_TOO_HEAVY blocks the whole specific delivery unless items are split.
+
+    // Logic:
+    // If ANY ineligible items exist -> PARTIAL (unless all are ineligible -> BLOCKED/PARTIAL?)
+    // If NO ineligible items, but CART limits exceeded -> BLOCKED (or split required)
+
+    if (splitResult.ineligibleItems.length > 0) {
+        state = splitResult.eligibleItems.length > 0 ? "partial" : "blocked";
+    }
+
+    // If perfectly clean split said OK, but total weight is huge?
+    // Actually splitCart handles item limits. Global limits are separate.
+    // If global cart weight > 20kg, even if all items are small, we can't send it in ONE wolt order.
+    // We'll mark it as BLOCKED or PARTIAL? The prompt says "Split cart into Wolt package and Store package".
+    // So if it's too heavy, maybe we just take as much as fits? 
+    // Complex. Let's keep it simple: If Global Totals exceeded -> BLOCKED (User has to manually reduce).
+    // OR we could technically support partial split for weight too, but that requires knapsack algo.
+    // Current simple logic:
+    if (cartReasons.length > 0) {
+        state = "blocked";
+    }
+
+    // Override: If items were split out (e.g. oversize), but the REMAINDER is valid -> PARTIAL.
+    // If we have cartReasons (e.g. Total Weight 50kg), we are blocked. 
+    // BUT maybe the user inteded: "If I have 50kg of items, put 20kg to Wolt and 30kg to Pickup".
+    // That is complex. Let's stick to: "Ineligible items are those PHYSICALLY incapable (too big/heavy)".
+    // If the SUM of ELIGIBLE items is > 20kg, then we are BLOCKED (Total Limit).
+
+    // Check eligible items total weight
+    const eligibleWeight = splitResult.eligibleItems.reduce((s, i) => s + (i.weightKg || 0) * i.qty, 0);
+    if (eligibleWeight > DELIVERY_LIMITS.maxWeightKg) {
+        state = "blocked";
+        cartReasons.push(ResolutionCode.CART_TOO_HEAVY);
+    }
+
+    const formattedEligible = splitResult.eligibleItems.map(i => ({ id: i.id, sku: i.id, qty: i.qty }));
+
+    // Ineligible map
+    const formattedIneligible = splitResult.ineligibleItems.map(i => ({
+        id: i.item.id,
+        reasons: i.reasons
+    }));
+
+    // If state is blocked because of cart limits, but we have valid items?
+    // If we have ANY ineligible items, we are at least PARTIAL.
+    // If ALL items are valid but Total Weight > 20kg -> BLOCKED (cannot split a bag of sand easily or multiple bags in one go logic missing).
+
+    let mainReason = "ELIGIBLE";
+    if (state !== "eligible") {
+        if (cartReasons.length > 0) mainReason = cartReasons[0];
+        else if (formattedIneligible.length > 0) mainReason = formattedIneligible[0].reasons[0]; // Grab first reason of first bad item
+    }
+
+    // If completely blocked (eligible is empty), state is blocked
+    if (formattedEligible.length === 0) state = "blocked";
 
     return {
-        eligible: split.ineligibleItems.length === 0,
-        reasons: Array.from(new Set(split.ineligibleItems.flatMap(i => i.reasons))), // dedupe reasons
-        totals: split.cartTotals,
-        eligibleItems: split.eligibleItems,
-        ineligibleItems: split.ineligibleItems,
-        eligibleTotals: split.eligibleTotals,
-        ineligibleTotals: split.ineligibleTotals
+        state,
+        reason_code: state === "eligible" ? null : mainReason,
+        reasons: cartReasons.map(c => ({ code: c })),
+        totals,
+        limits: DELIVERY_LIMITS,
+        eligibleItems: formattedEligible,
+        ineligibleItems: formattedIneligible
     };
 }
-
 
 export interface SplitItem<T> {
     item: T;
     originalQty: number;
 }
 
-export interface IneligibleItem<T> extends SplitItem<T> {
+export interface IneligibleItem<T> {
+    item: T;
     reasons: ResolutionCode[];
+    originalQty: number;
 }
 
-export interface EligibilityResult<T = any> {
-    eligible: boolean;
-    reasons: ResolutionCode[];
-    totals: {
-        totalWeightKg: number;
-        totalVolumeM3: number;
-        totalItems: number;
-    };
+// Output Types
+export interface SplitResult<T> {
     eligibleItems: T[];
     ineligibleItems: IneligibleItem<T>[];
     eligibleTotals: {
@@ -160,19 +263,25 @@ export interface EligibilityResult<T = any> {
     };
 }
 
+interface ItemTotals {
+    totalWeightKg: number;
+    totalVolumeM3: number;
+    totalItems: number;
+}
+
 export interface SplitResult<T = any> {
     eligibleItems: T[];
     ineligibleItems: IneligibleItem<T>[];
-    eligibleTotals: EligibilityResult["totals"];
-    ineligibleTotals: EligibilityResult["totals"];
-    cartTotals: EligibilityResult["totals"];
+    eligibleTotals: ItemTotals;
+    ineligibleTotals: ItemTotals;
+    cartTotals: ItemTotals;
 }
 
 /**
  * Splits cart into eligible (Wolt) and ineligible (Pickup/RFQ) items.
  * Handles quantity splitting (e.g. 5 bags ok, 6th bag too heavy).
  */
-export function splitCart<T extends { weightKg?: number; volumeM3?: number; bulky?: boolean; hazmat?: boolean; fragile?: boolean; deliveryClass?: string; qty: number; id?: string; name: string }>(items: T[]): SplitResult<T> {
+export function splitCart<T extends { weightKg?: number; volumeM3?: number; lengthCm?: number; widthCm?: number; heightCm?: number; deliveryAllowedWolt?: boolean; bulky?: boolean; hazmat?: boolean; fragile?: boolean; deliveryClass?: string; qty: number; id?: string; name: string }>(items: T[]): SplitResult<T> {
     const eligibleItems: T[] = [];
     const ineligibleItems: IneligibleItem<T>[] = [];
 
@@ -195,16 +304,37 @@ export function splitCart<T extends { weightKg?: number; volumeM3?: number; bulk
         // 1. Check PER-UNIT disqualifiers
         const reasons: ResolutionCode[] = [];
 
+        // Manual Block
+        if (originalItem.deliveryAllowedWolt === false) reasons.push(ResolutionCode.MANUAL_BLOCK);
+
         // Logical Constraints (Fragile, Hazmat, Class)
         if (DELIVERY_LIMITS.disallowBulky && (originalItem.bulky || originalItem.deliveryClass === "oversize" || originalItem.deliveryClass === "heavy")) reasons.push(ResolutionCode.BULKY_ITEMS);
         if (DELIVERY_LIMITS.disallowHazmat && originalItem.hazmat) reasons.push(ResolutionCode.HAZMAT_ITEMS);
         if (DELIVERY_LIMITS.disallowFragile && originalItem.fragile) reasons.push(ResolutionCode.FRAGILE_ITEMS);
 
+        // Dimensions Check
+        if (DELIVERY_LIMITS.requireKnownLogistics) {
+            if (originalItem.lengthCm === undefined || originalItem.widthCm === undefined || originalItem.heightCm === undefined || originalItem.weightKg === undefined) {
+                reasons.push(ResolutionCode.MISSING_DIMENSIONS);
+            }
+        }
+
+        // If dimensions exist, check side limits
+        if (originalItem.lengthCm && originalItem.widthCm && originalItem.heightCm) {
+            const sides = [originalItem.lengthCm, originalItem.widthCm, originalItem.heightCm].sort((a, b) => b - a);
+            const longest = sides[0];
+            const others = sides.slice(1);
+
+            if (longest > DELIVERY_LIMITS.maxLongestSideCm) reasons.push(ResolutionCode.ITEM_TOO_LARGE);
+            if (others.some(s => s > DELIVERY_LIMITS.maxSingleSideCm)) reasons.push(ResolutionCode.ITEM_TOO_LARGE);
+        }
+
         // Single Unit Limits
         if (unitWeight > DELIVERY_LIMITS.itemMaxWeightKg) reasons.push(ResolutionCode.ITEM_TOO_HEAVY);
         if (unitVolume > DELIVERY_LIMITS.itemMaxVolumeM3) reasons.push(ResolutionCode.ITEM_TOO_LARGE);
 
-        if (DELIVERY_LIMITS.requireKnownLogistics && (originalItem.weightKg === undefined || originalItem.volumeM3 === undefined)) {
+        if (!DELIVERY_LIMITS.requireKnownLogistics && (originalItem.weightKg === undefined || originalItem.volumeM3 === undefined)) {
+            // Only if we DON'T require strict logs, we might still flag unknown generic
             reasons.push(ResolutionCode.UNKNOWN_LOGISTICS);
         }
 
@@ -303,8 +433,8 @@ export interface SmartSuggestion {
     fromQty?: number;
     toQty?: number;
     reason: ResolutionCode;
-    originalTotals: EligibilityResult["totals"];
-    newTotals: EligibilityResult["totals"];
+    originalTotals: ItemTotals;
+    newTotals: ItemTotals;
 }
 
 /**
