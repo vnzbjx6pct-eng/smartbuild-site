@@ -2,20 +2,17 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 
-export type CartItem = {
-    id: string;
-    name: string;
-    category?: string;
-    unit?: string;
-    image?: string;
+import { Product } from "@/app/lib/types";
+
+export type CartItem = Product & {
     qty: number;
-    // We keep offers here to calculate totals roughly
-    offers?: { store: string; price: number; currency: string }[];
+    // We keep offers here to calculate totals roughly - already in Product but we can keep overlap if needed
 };
 
 type CartContextType = {
     items: CartItem[];
-    addItem: (product: any, qty?: number) => void;
+    addItem: (product: Product, qty?: number) => void;
+    updateItem: (id: string, qty: number) => void;
     inc: (id: string) => void;
     dec: (id: string) => void;
     remove: (id: string) => void;
@@ -49,7 +46,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         }
     }, [items]);
 
-    const addItem = (product: any, qty = 1) => {
+    const addItem = (product: Product, qty = 1) => {
         setItems((prev) => {
             const existing = prev.find((p) => p.id === product.id);
             if (existing) {
@@ -57,24 +54,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                     p.id === product.id ? { ...p, qty: p.qty + qty } : p
                 );
             }
-            // Create new item
+            // Create new item - spread product to keep all i18n keys
             return [
                 ...prev,
                 {
-                    id: product.id,
-                    name: product.name,
-                    category: product.category,
-                    unit: product.unit || product.unitLabel,
-                    image: product.image,
-                    offers: product.offers?.map((o: any) => ({
-                        store: o.storeName,
-                        price: o.price,
-                        currency: o.currency,
-                    })),
+                    ...product,
+                    // offers: product.offers provided by spread ...product
                     qty,
                 },
             ];
         });
+    };
+
+    const updateItem = (id: string, qty: number) => {
+        setItems((prev) =>
+            prev.map((p) => (p.id === id ? { ...p, qty } : p))
+        );
     };
 
     const inc = (id: string) => {
@@ -103,7 +98,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     return (
         <CartContext.Provider
-            value={{ items, addItem, inc, dec, remove, clear, totalItems }}
+            value={{ items, addItem, updateItem, inc, dec, remove, clear, totalItems }}
         >
             {children}
         </CartContext.Provider>
