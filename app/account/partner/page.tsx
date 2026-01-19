@@ -21,6 +21,8 @@ import {
     Search
 } from "lucide-react";
 import Link from "next/link";
+import { categorizeProduct } from "@/app/lib/categorization";
+import { savePartnerProducts } from "@/app/actions/partner";
 // import Papa from "papaparse"; // Not installed? I'll use simple split for MVP.
 
 export default function PartnerDashboardPage() {
@@ -33,6 +35,7 @@ export default function PartnerDashboardPage() {
     const [activeTab, setActiveTab] = useState<'overview' | 'import' | 'products'>('import');
     const [file, setFile] = useState<File | null>(null);
     const [preview, setPreview] = useState<any[]>([]);
+    const [allData, setAllData] = useState<any[]>([]);
     const [uploading, setUploading] = useState(false);
     const [uploadStatus, setUploadStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
@@ -50,6 +53,18 @@ export default function PartnerDashboardPage() {
             headers.forEach((header, index) => {
                 obj[header] = currentline[index]?.trim();
             });
+
+            // Auto Categorization
+            const catResult = categorizeProduct({
+                name: obj['product_name'] || obj['name'] || '',
+                category: obj['category'] || '',
+                description: obj['description'] || ''
+            });
+
+            obj['auto_category'] = catResult.category;
+            obj['auto_subcategory'] = catResult.subcategory;
+            obj['confidence'] = Math.round(catResult.confidence * 100) + '%';
+
             result.push(obj);
         }
         return result;
@@ -62,18 +77,33 @@ export default function PartnerDashboardPage() {
 
             const text = await f.text();
             const data = parseCSV(text);
+            setAllData(data);
             setPreview(data.slice(0, 5)); // Preview first 5
         }
     };
 
     const handleUpload = async () => {
         setUploading(true);
-        // Simulate API call
-        await new Promise(r => setTimeout(r, 1500));
+        try {
+            // Mock store ID for MVP - in real app would get from auth session
+            const storeId = '00000000-0000-0000-0000-000000000000';
+
+            const result = await savePartnerProducts(allData, storeId);
+
+            if (result.success) {
+                setUploadStatus('success');
+                setFile(null);
+                setPreview([]);
+                setAllData([]);
+            } else {
+                setUploadStatus('error');
+                console.error("Upload failed", result.error);
+            }
+        } catch (e) {
+            console.error(e);
+            setUploadStatus('error');
+        }
         setUploading(false);
-        setUploadStatus('success');
-        setFile(null);
-        setPreview([]);
     };
 
     return (
