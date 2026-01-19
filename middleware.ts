@@ -5,6 +5,13 @@ import { isPartner } from './app/lib/auth'
 
 export async function middleware(req: NextRequest) {
     const res = NextResponse.next()
+
+    // Safety check for environment variables to prevent runtime error
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+        console.warn('Missing Supabase environment variables - middleware disabled')
+        return res
+    }
+
     const supabase = createMiddlewareClient({ req, res })
 
     // Refresh session if expired - required for Server Components
