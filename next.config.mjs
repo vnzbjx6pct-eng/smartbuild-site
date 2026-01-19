@@ -8,6 +8,15 @@ const nextConfig = {
             },
         ],
     },
+    async redirects() {
+        return [
+            {
+                source: '/about',
+                destination: '/meist',
+                permanent: true,
+            },
+        ];
+    },
 };
 
 export default nextConfig;

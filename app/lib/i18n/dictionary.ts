@@ -358,6 +358,17 @@ export const ET_DICTIONARY = {
         type_store_delivery: "Poe tarne",
         type_pickup: "Ise järele",
         repeat_order: "Korda tellimust"
+    },
+    about: {
+        title: "SmartBuildist",
+        subtitle: "Sõltumatu hinnavõrdlusportaal targale ehitajale.",
+        desc_1: "SmartBuild on Eesti juhtiv ehitusmaterjalide hinnavõrdlusportaal. Aitame nii eraisikutel kui ka ehitusettevõtetel leida parimad pakkumised suurematest poodidest nagu Espak, Bauhof, K-Rauta ja Decora.",
+        desc_2: "Meie missioon on muuta ehitusmaterjalide turg läbipaistvaks ja lihtsasti jälgitavaks. Automatiseerime hinnapäringute protsessi, et säästaksite igalt projektilt aega ja raha.",
+        contact_title: "Kontakt",
+        email: "info@smartbuild.ee",
+        phone: "+372 5555 1234",
+        address: "Tallinn, Eesti",
+        back_catalog: "Tagasi kataloogi"
     }
 };
 
@@ -719,5 +730,16 @@ export const RU_DICTIONARY: Dictionary = {
         type_store_delivery: "Доставка магазина",
         type_pickup: "Самовывоз",
         repeat_order: "Повторить заказ"
+    },
+    about: {
+        title: "О SmartBuild",
+        subtitle: "Независимая платформа сравнения цен для умного строительства.",
+        desc_1: "SmartBuild - это ведущий портал сравнения цен на строительные материалы в Эстонии. Мы помогаем частным лицам и строительным компаниям находить лучшие предложения от крупнейших магазинов, таких как Espak, Bauhof, K-Rauta и Decora.",
+        desc_2: "Наша миссия - сделать рынок строительных материалов прозрачным и доступным. Мы автоматизируем процесс запроса цен, чтобы вы могли сэкономить время и деньги на каждом проекте.",
+        contact_title: "Контакты",
+        email: "info@smartbuild.ee",
+        phone: "+372 5555 1234",
+        address: "Tallinn, Eesti",
+        back_catalog: "В каталог"
     }
 };

@@ -23,7 +23,7 @@ export default function Footer() {
                 <div>
                     <h4 className="text-white font-semibold mb-3">{(t as any).footer?.company ?? "Ettevõte"}</h4>
                     <ul className="text-sm space-y-2">
-                        <li><Link href="/about" className="hover:text-white">{(t as any).footer?.about_us ?? "Meist"}</Link></li>
+                        <li><Link href="/meist" className="hover:text-white">{(t as any).footer?.about_us ?? "Meist"}</Link></li>
                         <li><Link href="/contact" className="hover:text-white">{(t as any).footer?.contact ?? "Kontakt"}</Link></li>
                         <li><Link href="/partner/plans" className="hover:text-emerald-400 text-emerald-500/80">{(t as any).footer?.partners ?? "Partneritele"}</Link></li>
                     </ul>
