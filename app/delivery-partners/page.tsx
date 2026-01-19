@@ -14,8 +14,10 @@ import {
     AlertTriangle,
     Boxes,
     ServerCog,
-    BadgeCheck
+    BadgeCheck,
+    Send
 } from "lucide-react";
+import Link from "next/link";
 
 export default function DeliveryPartnersPage() {
     const { t } = useLanguage();
@@ -28,8 +30,8 @@ export default function DeliveryPartnersPage() {
             {/* Hero Section */}
             <section className="bg-[#0f172a] text-white pt-24 pb-32 relative overflow-hidden">
                 {/* Tech Background Grid */}
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
-                <div className="absolute inset-0 bg-gradient-to-b from-blue-900/20 to-slate-900"></div>
+                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none"></div>
+                <div className="absolute inset-0 bg-gradient-to-b from-blue-900/20 to-slate-900 pointer-events-none"></div>
 
                 <div className="container mx-auto px-4 relative z-10 text-center max-w-4xl">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-bold uppercase tracking-wide mb-8">
@@ -42,11 +44,18 @@ export default function DeliveryPartnersPage() {
                     <p className="text-xl text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed">
                         {txt.subtitle}
                     </p>
-                    <div className="flex justify-center">
-                        <button className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-600/20 flex items-center gap-2">
+                    <div className="flex flex-col items-center justify-center gap-4">
+                        <Link
+                            href="/partners/contact?type=delivery"
+                            className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-600/20 flex items-center gap-2 cursor-pointer z-20"
+                        >
                             {txt.cta}
                             <ArrowRight size={20} />
-                        </button>
+                        </Link>
+
+                        <a href="mailto:info@smartbuild.ee" className="text-sm text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-2 cursor-pointer z-20">
+                            <Send size={12} /> info@smartbuild.ee
+                        </a>
                     </div>
                     <p className="mt-4 text-xs text-slate-500">{txt.cta_sub}</p>
                 </div>
@@ -211,10 +220,10 @@ export default function DeliveryPartnersPage() {
                     </p>
 
                     <div className="mt-12 p-6 bg-slate-800/50 rounded-2xl border border-slate-700 inline-block">
-                        <button className="px-10 py-4 bg-white hover:bg-slate-200 text-slate-900 font-bold rounded-xl transition-colors text-lg flex items-center gap-3 mx-auto">
+                        <Link href="/partners/contact?type=delivery" className="inline-flex items-center gap-3 px-10 py-4 bg-white hover:bg-slate-200 text-slate-900 font-bold rounded-xl transition-colors text-lg mx-auto cursor-pointer">
                             {txt.cta}
                             <ArrowRight size={20} />
-                        </button>
+                        </Link>
                         <p className="mt-4 text-xs text-slate-500">{txt.cta_sub}</p>
                     </div>
                 </div>

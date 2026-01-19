@@ -564,7 +564,56 @@ export const ET_DICTIONARY = {
             text: "SmartBuild on ehitusmaterjalide tellimuste filter ja koordinaator. Me ei saada kulleritele sobimatuid tellimusi. Arvutame eelnevalt kaalu, mahu ja tingimused. Tarnele lähevad ainult reaalselt teostatavad tellimused. See vähendab tühistamisi ja avab uue turu."
         },
         cta: "Arutame koostööd",
-        cta_sub: "API-integratsioon arutatakse eraldi pärast MVP testimist."
+        cta_sub: "API-integratsioon arutatakse eraldi pärast MVP testimist.",
+        form: {
+            title: "Hakka partneriks",
+            subtitle: "Täida vorm ja võtame ühendust.",
+            company: "Ettevõtte nimi",
+            contact_name: "Kontaktisik",
+            email: "E-post",
+            phone: "Telefon",
+            type: "Partneri tüüp",
+            type_store: "Ehituspood",
+            type_delivery: "Kullerfirma",
+            type_other: "Muu",
+            integration: "Liidestuse soov",
+            integration_api: "API liidestus",
+            integration_csv: "CSV / Excel import",
+            integration_manual: "Manuaalne haldus",
+            message: "Lisainfo",
+            submit: "Saada taotlus",
+            success: "Taotlus saadetud!",
+            success_desc: "Võtame ühendust esimesel võimalusel."
+        }
+    },
+    contact: {
+        title: "Kontakt & Tugi",
+        subtitle: "Oleme siin, et aidata.",
+        form: {
+            name: "Nimi",
+            email: "E-post",
+            topic: "Teema",
+            message: "Sõnum",
+            submit: "Saada sõnum",
+            success: "Sõnum saadetud!",
+            success_desc: "Vastame 24h jooksul.",
+            error: "Viga saatmisel. Proovi uuesti.",
+            topics: {
+                general: "Üldine küsimus",
+                orders: "Tellimused",
+                partners: "Partnerlus",
+                technical: "Tehniline probleem"
+            }
+        },
+        faq: {
+            title: "Korduma kippuvad küsimused",
+            q1: "Kui kiiresti kaup saabub?",
+            a1: "Tavaliselt 1-3 tööpäeva jooksul, sõltuvalt poest ja tarneviisist.",
+            q2: "Kas saan tellimust muuta?",
+            a2: "Jah, võtke ühendust klienditoega enne kauba väljastamist.",
+            q3: "Kuidas toimub tagastus?",
+            a3: "14 päeva jooksul on võimalik kaup tagastada. Vaata täpsemaid tingimusi müügitingimustest."
+        }
     }
 
 };
@@ -1134,7 +1183,56 @@ export const RU_DICTIONARY: Dictionary = {
             text: "SmartBuild — это фильтр и координатор заказов на стройматериалы. Мы не отправляем курьерам неподходящие заказы. Мы заранее считаем вес, объём и условия доставки. В доставку попадают только те заказы, которые реально можно выполнить. Это снижает отмены, поддержку и негатив, и открывает новый рынок строительных доставок."
         },
         cta: "Обсудить сотрудничество",
-        cta_sub: "API-интеграция обсуждается после тестирования MVP."
+        cta_sub: "API-интеграция обсуждается после тестирования MVP.",
+        form: {
+            title: "Стать партнером",
+            subtitle: "Заполните форму и мы свяжемся с вами.",
+            company: "Название компании",
+            contact_name: "Контактное лицо",
+            email: "Email",
+            phone: "Телефон",
+            type: "Тип партнера",
+            type_store: "Строительный магазин",
+            type_delivery: "Курьерская служба",
+            type_other: "Другое",
+            integration: "Желаемая интеграция",
+            integration_api: "API интеграция",
+            integration_csv: "CSV / Excel импорт",
+            integration_manual: "Ручное управление",
+            message: "Доп. инфо",
+            submit: "Отправить заявку",
+            success: "Заявка отправлена!",
+            success_desc: "Мы свяжемся с вами при первой возможности."
+        }
+    },
+    contact: {
+        title: "Контакты и Поддержка",
+        subtitle: "Мы здесь, чтобы помочь.",
+        form: {
+            name: "Имя",
+            email: "Email",
+            topic: "Тема",
+            message: "Сообщение",
+            submit: "Отправить сообщение",
+            success: "Сообщение отправлено!",
+            success_desc: "Ответим в течение 24 часов.",
+            error: "Ошибка отправки. Попробуйте снова.",
+            topics: {
+                general: "Общий вопрос",
+                orders: "Заказы",
+                partners: "Партнерство",
+                technical: "Техническая проблема"
+            }
+        },
+        faq: {
+            title: "Часто задаваемые вопросы",
+            q1: "Как быстро придет товар?",
+            a1: "Обычно в течение 1-3 рабочих дней, в зависимости от магазина и способа доставки.",
+            q2: "Можно ли изменить заказ?",
+            a2: "Да, свяжитесь с поддержкой до отправки товара.",
+            q3: "Как оформить возврат?",
+            a3: "Товар можно вернуть в течение 14 дней. Детали в условиях продажи."
+        }
     }
 
 };

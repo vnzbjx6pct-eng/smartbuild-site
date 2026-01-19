@@ -27,8 +27,8 @@ export default function PartnersPage() {
         <div className="min-h-screen bg-slate-50">
             {/* Hero Section */}
             <section className="bg-slate-900 text-white pt-24 pb-32 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-500/10 rotate-12 transform translate-x-32 blur-3xl"></div>
-                <div className="absolute bottom-0 left-0 w-1/3 h-full bg-blue-500/10 -rotate-12 transform -translate-x-32 blur-3xl"></div>
+                <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-500/10 rotate-12 transform translate-x-32 blur-3xl pointer-events-none"></div>
+                <div className="absolute bottom-0 left-0 w-1/3 h-full bg-blue-500/10 -rotate-12 transform -translate-x-32 blur-3xl pointer-events-none"></div>
 
                 <div className="container mx-auto px-4 relative z-10 text-center max-w-4xl">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-300 text-xs font-medium mb-6">
@@ -41,11 +41,18 @@ export default function PartnersPage() {
                     <p className="text-xl text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed">
                         {txt.subtitle}
                     </p>
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                        <button className="px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20 flex items-center gap-2">
+                    <div className="flex flex-col items-center justify-center gap-4">
+                        <Link
+                            href="/partners/contact"
+                            className="px-8 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20 flex items-center gap-2 cursor-pointer relative z-20"
+                        >
                             {txt.cta}
                             <ArrowRight size={20} />
-                        </button>
+                        </Link>
+
+                        <a href="mailto:info@smartbuild.ee" className="text-sm text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-2 cursor-pointer z-20">
+                            <Send size={12} /> info@smartbuild.ee
+                        </a>
                     </div>
                 </div>
             </section>
@@ -194,9 +201,10 @@ export default function PartnersPage() {
             <section className="py-24 bg-slate-900 text-white text-center">
                 <div className="container mx-auto px-4">
                     <h2 className="text-3xl font-bold mb-8">Ready to grow?</h2>
-                    <button className="px-10 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20 text-lg">
+                    <Link href="/partners/contact" className="inline-flex items-center gap-3 px-10 py-4 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-orange-500/20 text-lg cursor-pointer">
                         {txt.cta}
-                    </button>
+                        <ArrowRight size={20} />
+                    </Link>
                     <p className="mt-6 text-slate-500 text-sm">
                         SmartBuild Platform &copy; 2026
                     </p>
