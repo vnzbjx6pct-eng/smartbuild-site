@@ -39,10 +39,10 @@ export default function DeliveryPartnersPage() {
                         <span>Logistics Partner Program</span>
                     </div>
                     <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-8 leading-tight">
-                        {txt.title}
+                        Fewer failed deliveries. <br /> Higher efficiency.
                     </h1>
                     <p className="text-xl text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed">
-                        {txt.subtitle}
+                        SmartBuild filters orders before they reach delivery platforms. We ensure every pickup is feasible and every drop-off is successful.
                     </p>
                     <div className="flex flex-col items-center justify-center gap-4">
                         <Link
@@ -201,7 +201,14 @@ export default function DeliveryPartnersPage() {
                 <div className="container mx-auto px-4 max-w-4xl">
                     <h2 className="text-3xl font-bold text-slate-900 text-center mb-12">{txt.benefits.title}</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
-                        {(txt.benefits.items as string[]).map((item, idx) => (
+                        {[
+                            "Cleaner order stream (ready-to-ship)",
+                            "Reduced cancellations & failed pickups",
+                            "Higher courier success rate",
+                            "Lower support cost",
+                            "New revenue stream (Construction)",
+                            "Predictable load & dimensions"
+                        ].map((item, idx) => (
                             <div key={idx} className="flex items-center gap-4">
                                 <CheckCircle2 className="text-blue-600 shrink-0" size={24} />
                                 <span className="text-lg text-slate-700 font-medium">{item}</span>

@@ -90,16 +90,24 @@ export default function PartnersPage() {
             <section className="py-16">
                 <div className="container mx-auto px-4">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-                        {/* Left: Benefits */}
+                        {/* Left: Benefits (How it helps) */}
                         <div>
-                            <h2 className="text-3xl font-bold text-slate-900 mb-8">{txt.benefits.title}</h2>
-                            <div className="space-y-4">
-                                {(txt.benefits.list as string[]).map((benefit, idx) => (
-                                    <div key={idx} className="flex items-start gap-4 p-4 rounded-xl hover:bg-white hover:shadow-sm transition-all border border-transparent hover:border-slate-100">
-                                        <div className="mt-1 shrink-0 w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
-                                            <CheckCircle2 size={14} className="text-green-600" />
+                            <h2 className="text-3xl font-bold text-slate-900 mb-8">{(txt as any).how_it_helps.title}</h2>
+                            <div className="space-y-6">
+                                {[
+                                    (txt as any).how_it_helps.reason1,
+                                    (txt as any).how_it_helps.reason2,
+                                    (txt as any).how_it_helps.reason3,
+                                    (txt as any).how_it_helps.reason4
+                                ].map((reason: any, idx) => (
+                                    <div key={idx} className="flex items-start gap-4 p-5 rounded-2xl bg-white shadow-sm border border-slate-100 hover:border-orange-200 transition-all">
+                                        <div className="mt-1 shrink-0 w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
+                                            <CheckCircle2 size={16} className="text-orange-600" />
                                         </div>
-                                        <span className="text-lg text-slate-700 font-medium">{benefit}</span>
+                                        <div>
+                                            <h3 className="text-lg font-bold text-slate-900 mb-1">{reason.title}</h3>
+                                            <p className="text-slate-600 leading-relaxed">{reason.text}</p>
+                                        </div>
                                     </div>
                                 ))}
                             </div>

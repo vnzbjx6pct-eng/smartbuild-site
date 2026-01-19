@@ -475,7 +475,35 @@ export const ET_DICTIONARY = {
     },
     partners: {
         title: "Vähem segadust. Rohkem müüki.",
-        subtitle: "SmartBuild edastab ainult kvaliteetsed ja struktureeritud päringud.",
+        subtitle: "SmartBuild saadab ainult konkreetseid ja struktureeritud päringuid.",
+        how_it_helps: {
+            title: "Miks liituda SmartBuildiga?",
+            reason1: { title: "Vähem müra", text: "Saadame ainult kontrollitud päringuid, mitte juhuslikke küsimusi." },
+            reason2: { title: "Valmis kliendid", text: "Kliendil on ostunimekiri koos ja vajadus reaalne." },
+            reason3: { title: "Struktureeritud andmed", text: "Tooted, kogused ja tarneinfo on alati korrektses formaadis." },
+            reason4: { title: "Tulevikuvalmidus", text: "Valmisolek API ja tootevoogude (feed) ühendamiseks." }
+        },
+        form: {
+            title: "Hakka partneriks",
+            subtitle: "Täida vorm ja leiame sobiva koostöömudeli.",
+            company: "Ettevõtte nimi",
+            contact_name: "Kontaktisik",
+            email: "E-post",
+            phone: "Telefon",
+            city: "Linn / Piirkond",
+            type: "Tegevusala",
+            type_store: "Ehituspood",
+            type_wholesaler: "Hulgimüüja",
+            type_manufacturer: "Tootja",
+            type_logistics: "Logistika / Kuller",
+            api_ready: "Kas teil on API või tootevoog (XML/CSV)?",
+            api_yes: "Jah, on olemas",
+            api_no: "Ei, puudub / Ei tea",
+            submit: "Saada taotlus",
+            success: "Taotlus saadetud!",
+            success_desc: "Võtame ühendust 1 tööpäeva jooksul."
+        },
+        cta: "Võta meiega ühendust",
         how_it_works: {
             title: "Kuidas see töötab?",
             step1: "Klient valib tooted",
@@ -513,8 +541,7 @@ export const ET_DICTIONARY = {
             viz1: "Populaarsed tooted",
             viz2: "Keskmine tellimus",
             viz3: "Hinnatase"
-        },
-        cta: "Võta meiega ühendust"
+        }
     },
     delivery_partners: {
         title: "Vähem tühistamisi. Rohkem kvaliteetseid tellimusi.",
@@ -1106,47 +1133,73 @@ export const RU_DICTIONARY: Dictionary = {
     },
     partners: {
         title: "Меньше хаоса. Больше продаж.",
-        subtitle: "SmartBuild передаёт только структурированные и готовые заявки.",
+        subtitle: "SmartBuild присылает только конкретные и структурированные запросы.",
+        how_it_helps: {
+            title: "Зачем подключаться к SmartBuild?",
+            reason1: { title: "Меньше шума", text: "Мы присылаем только проверенные запросы, а не случайные вопросы." },
+            reason2: { title: "Готовые клиенты", text: "У клиента уже собран список покупок и есть реальная потребность." },
+            reason3: { title: "Структурированные данные", text: "Товары, количества и инфо о доставке всегда в корректном формате." },
+            reason4: { title: "Готовность к будущему", text: "Готовность к подключению API и товарных фидов." }
+        },
+        form: {
+            title: "Стать партнером",
+            subtitle: "Заполните форму, и мы подберем модель сотрудничества.",
+            company: "Название компании",
+            contact_name: "Контактное лицо",
+            email: "Email",
+            phone: "Телефон",
+            city: "Город / Регион",
+            type: "Сфера деятельности",
+            type_store: "Строительный магазин",
+            type_wholesaler: "Оптовик",
+            type_manufacturer: "Производитель",
+            type_logistics: "Логистика / Курьер",
+            api_ready: "Есть ли у вас API или фид (XML/CSV)?",
+            api_yes: "Да, есть",
+            api_no: "Нет / Не знаю",
+            submit: "Отправить заявку",
+            success: "Заявка отправлена!",
+            success_desc: "Свяжемся в течение 1 рабочего дня."
+        },
+        cta: "Связаться с нами",
         how_it_works: {
             title: "Как это работает?",
             step1: "Клиент выбирает товары",
-            step2: "Указывает объёмы",
+            step2: "Указывает объемы",
             step3: "Выбирает город",
             step4: "Отправляет запрос"
         },
         demo_rfq: {
             title: "Пример заявки",
             city: "Город",
-            items: "Товаров",
-            volume: "Объём",
+            items: "Товары",
+            volume: "Объем",
             deadline: "Срок",
             client: "Клиент",
             example_city: "Тарту",
             example_deadline: "Срочно",
-            example_client: "Строитель"
+            example_client: "Строит. фирма"
         },
         benefits: {
             title: "Что получают магазины?",
             list: [
-                "Меньше пустых и неточных запросов",
-                "Экономия времени менеджеров",
-                "Готовые к покупке клиенты",
-                "Честная конкуренция по объёму",
-                "Аналитика рынка и трендов"
+                "Меньше пустых запросов",
+                "Экономия времени продавцов",
+                "Готовые конкретные клиенты",
+                "Честная конкуренция по объему",
+                "Аналитика рынка"
             ]
         },
-
         allocation: {
             title: "Умное распределение",
-            text: "Заявки распределяются автоматически по городу и загрузке менеджеров."
+            text: "Запросы распределяются автоматически по городу и нагрузке. Никакого спама."
         },
         analytics: {
             title: "Аналитика рынка",
             viz1: "Популярные товары",
             viz2: "Средний чек",
             viz3: "Сравнение цен"
-        },
-        cta: "Связаться с нами"
+        }
     },
     delivery_partners: {
         title: "Меньше отмен. Больше качественных заказов.",

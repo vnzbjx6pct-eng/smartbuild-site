@@ -9,7 +9,10 @@ import {
     Send,
     CheckCircle2,
     AlertCircle,
-    ArrowLeft
+    ArrowLeft,
+    Factory,
+    Package,
+    Store
 } from "lucide-react";
 import Link from 'next/link';
 
@@ -68,10 +71,12 @@ function PartnerContactContent() {
                 {/* Header */}
                 <div className="text-center mb-12">
                     <div className="inline-flex items-center justify-center p-4 bg-white rounded-2xl shadow-sm border border-slate-100 mb-6">
-                        {partnerType === 'delivery' ? (
+                        {partnerType === 'logistics' ? (
                             <Truck size={32} className="text-blue-600" />
+                        ) : partnerType === 'manufacturer' ? (
+                            <Factory size={32} className="text-purple-600" />
                         ) : (
-                            <Building2 size={32} className="text-orange-600" />
+                            <Store size={32} className="text-orange-600" />
                         )}
                     </div>
                     <h1 className="text-4xl font-bold text-slate-900 mb-4">{strings.title}</h1>
@@ -93,7 +98,7 @@ function PartnerContactContent() {
                             </Link>
                         </div>
                     ) : (
-                        <form onSubmit={handleSubmit} className="p-8 md:p-12 space-y-8">
+                        <form onSubmit={handleSubmit} className="p-8 md:p-12 space-y-10">
 
                             {/* Company Details */}
                             <div className="space-y-6">
@@ -106,6 +111,15 @@ function PartnerContactContent() {
                                             required
                                             className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all"
                                             placeholder="Company OÜ"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">{strings.city}</label>
+                                        <input
+                                            name="city"
+                                            required
+                                            className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all"
+                                            placeholder="Tallinn"
                                         />
                                     </div>
                                     <div>
@@ -132,6 +146,7 @@ function PartnerContactContent() {
                                         <input
                                             name="phone"
                                             type="tel"
+                                            required
                                             className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all"
                                             placeholder="+372 5555 1234"
                                         />
@@ -141,19 +156,20 @@ function PartnerContactContent() {
 
                             {/* Partnership Details */}
                             <div className="space-y-6">
-                                <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-2 mb-4">Koostöö tüüp</h3>
+                                <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-2 mb-4">Tegevusala</h3>
 
                                 <div>
                                     <label className="block text-sm font-medium text-slate-700 mb-3">{strings.type}</label>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {[
-                                            { id: 'store', label: strings.type_store, icon: Building2 },
-                                            { id: 'delivery', label: strings.type_delivery, icon: Truck },
-                                            { id: 'other', label: strings.type_other, icon: CheckCircle2 }
+                                            { id: 'store', label: strings.type_store, icon: Store },
+                                            { id: 'wholesaler', label: strings.type_wholesaler, icon: Package },
+                                            { id: 'manufacturer', label: strings.type_manufacturer, icon: Factory },
+                                            { id: 'logistics', label: strings.type_logistics, icon: Truck },
                                         ].map((type) => (
                                             <label
                                                 key={type.id}
-                                                className={`relative flex flex-col items-center p-4 rounded-xl border-2 cursor-pointer transition-all ${partnerType === type.id ? 'border-orange-500 bg-orange-50' : 'border-slate-100 hover:border-slate-200 bg-slate-50/50'}`}
+                                                className={`relative flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${partnerType === type.id ? 'border-orange-500 bg-orange-50' : 'border-slate-100 hover:border-slate-200 bg-slate-50/50'}`}
                                             >
                                                 <input
                                                     type="radio"
@@ -163,7 +179,7 @@ function PartnerContactContent() {
                                                     onChange={(e) => setPartnerType(e.target.value)}
                                                     className="absolute opacity-0 w-full h-full cursor-pointer"
                                                 />
-                                                <div className={`mb-2 ${partnerType === type.id ? 'text-orange-600' : 'text-slate-400'}`}>
+                                                <div className={`shrink-0 ${partnerType === type.id ? 'text-orange-600' : 'text-slate-400'}`}>
                                                     <type.icon size={24} />
                                                 </div>
                                                 <span className={`font-bold ${partnerType === type.id ? 'text-slate-900' : 'text-slate-600'}`}>{type.label}</span>
@@ -172,27 +188,20 @@ function PartnerContactContent() {
                                     </div>
                                 </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-3">{strings.integration}</label>
-                                    <select
-                                        name="integration_type"
-                                        className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all bg-white"
-                                    >
-                                        <option value="API">{strings.integration_api}</option>
-                                        <option value="CSV">{strings.integration_csv}</option>
-                                        <option value="Manual">{strings.integration_manual}</option>
-                                    </select>
+                                <div className="pt-4">
+                                    <label className="block text-sm font-medium text-slate-900 mb-3">{strings.api_ready}</label>
+                                    <div className="flex gap-4">
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input type="radio" name="api_readiness" value="Yes" className="w-5 h-5 text-orange-600" />
+                                            <span className="text-slate-700">{strings.api_yes}</span>
+                                        </label>
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input type="radio" name="api_readiness" value="No" defaultChecked className="w-5 h-5 text-orange-600" />
+                                            <span className="text-slate-700">{strings.api_no}</span>
+                                        </label>
+                                    </div>
                                 </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1">{strings.message}</label>
-                                    <textarea
-                                        name="message"
-                                        rows={4}
-                                        className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-all resize-none"
-                                        placeholder=""
-                                    />
-                                </div>
                             </div>
 
                             {error && (
@@ -202,7 +211,7 @@ function PartnerContactContent() {
                                 </div>
                             )}
 
-                            <div className="pt-4 border-t border-slate-100">
+                            <div className="pt-6 border-t border-slate-100">
                                 <button
                                     disabled={loading}
                                     className="w-full py-5 bg-orange-600 hover:bg-orange-700 text-white text-lg font-bold rounded-xl transition-all shadow-lg shadow-orange-600/20 flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed transform active:scale-[0.99]"
