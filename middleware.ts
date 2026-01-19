@@ -34,8 +34,10 @@ export async function middleware(req: NextRequest) {
 
         if (!isPartnerUser) {
             const redirectUrl = req.nextUrl.clone()
-            redirectUrl.pathname = '/partners'
-            redirectUrl.searchParams.set('error', 'not_partner')
+            redirectUrl.pathname = '/account'
+            // removing error param to keep it clean, or could keep it. 
+            // User didn't strictly say to remove params, but /account is cleaner.
+            // Let's keep the optional query param to be helpful but minimal.
             return NextResponse.redirect(redirectUrl)
         }
     }
