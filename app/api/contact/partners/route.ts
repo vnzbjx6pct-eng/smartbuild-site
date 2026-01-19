@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/app/lib/supabaseServer";
+import { calculateLeadScore } from "@/app/lib/leadScoring";
 
 export async function POST(request: Request) {
     try {
@@ -19,6 +20,14 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         }
 
+        // Calculate Lead Score
+        const scoring = calculateLeadScore({
+            partnerType: partner_type,
+            apiReadiness: api_readiness,
+            city: city,
+            companyName: company_name
+        });
+
         // 1. Save to Supabase
         const { error: dbError } = await supabase
             .from('partners_contacts')
@@ -30,7 +39,12 @@ export async function POST(request: Request) {
                 city,
                 partner_type,
                 api_readiness: api_readiness || 'No',
-                status: 'new'
+                status: 'new',
+
+                // Lead Scoring
+                lead_score: scoring.score,
+                lead_tier: scoring.tier,
+                lead_score_reason: scoring.reason
             });
 
         if (dbError) {

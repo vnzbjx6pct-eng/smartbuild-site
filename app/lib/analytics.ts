@@ -1,54 +1,59 @@
-"use client";
-import { track as vercelTrack } from "@vercel/analytics";
 
-type EventName =
-    | "view_home"
-    | "view_catalog"
-    | "view_product"
-    | "add_to_cart"
-    | "start_rfq"
-    | "submit_rfq"
-    | "rfq_success"
-    | "hero_primary_cta_click"
-    | "hero_secondary_cta_click"
-    | "search_focus"
-    | "search_input_started"
-    | "search_submit"
-    | "empty_state_shown"
-    | "empty_state_cta_click"
-    | "empty_state_search_refine"
-    | "empty_state_rfq_started"
-    | "add_to_cart_success"
-    | "toast_primary_click"
-    | "toast_secondary_click"
-    | "mobile_search_started"
-    | "mobile_add_to_cart"
-    | "mobile_rfq_started"
-    | "mobile_rfq_completed"
-    | "trust_block_viewed"
-    | "rfq_started_after_trust";
+import { supabase } from './supabaseServer';
 
-type EventProperties = Record<string, string | number | boolean>;
+export type AnalyticsEventName =
+    | 'view_home'
+    | 'view_product'
+    | 'cart_add'
+    | 'checkout_start'
+    | 'order_placed'
+    | 'delivery_check_failed'
+    | 'partner_signup_click';
 
-/**
- * Safe analytics tracker for Vercel Analytics.
- * Works in production. Logs to console in development.
- * Never throws.
- */
-export function track(eventName: EventName, properties?: EventProperties) {
+export async function trackEvent(
+    eventName: AnalyticsEventName,
+    userId?: string,
+    properties: Record<string, any> = {}
+) {
     try {
-        if (process.env.NODE_ENV === "development") {
-            const propStr = properties ? JSON.stringify(properties) : "";
-            console.log(`[Analytics] ${eventName} ${propStr}`);
-            return;
-        }
-
-        vercelTrack(eventName, properties);
-    } catch (err) {
-        // Silently fail to avoid affecting UX
-        // In dev, we can log it
-        if (process.env.NODE_ENV === "development") {
-            console.warn("[Analytics] Tracking failed:", err);
-        }
+        await supabase.from('analytics_events').insert({
+            event_name: eventName,
+            user_id: userId,
+            properties
+        });
+    } catch (e) {
+        console.error("Analytics Error:", e);
+        // Fail silently to not block user flow
     }
+}
+
+// Aggregation Helpers (SQL Wrappers)
+
+export async function getFunnelStats(startDate: string, endDate: string) {
+    // In a real scenario, this would be a complex SQL Group By or multiple queries.
+    // For MVP, we'll mock or doing simple counts if table populated.
+    // Ideally use Supabase RPC or just Count queries.
+
+    // Pseudo-implementation:
+    /*
+    const views = await supabase.from('analytics_events').select('*', { count: 'exact' }).eq('event_name', 'view_home');
+    const carts = ...
+    */
+
+    // Just returning structure for now as per instructions "helpers".
+    return {
+        views: 0,
+        carts: 0,
+        checkouts: 0,
+        orders: 0
+    };
+}
+
+export async function getDeliveryRefusals() {
+    // Breakdown of 'delivery_check_failed' events by 'reason' property
+    return {
+        over_weight: 0,
+        no_service: 0,
+        other: 0
+    };
 }
