@@ -369,6 +369,202 @@ export const ET_DICTIONARY = {
         phone: "+372 5555 1234",
         address: "Tallinn, Eesti",
         back_catalog: "Tagasi kataloogi"
+    },
+    order_details: {
+        status_in_progress: "Tellimus on töös",
+        status_completed: "Tellimus täidetud",
+        status_problem: "Tarne viibib",
+        eta_title: "Eeldatav tarne:",
+        eta_today: "Täna",
+        eta_tomorrow: "Homme",
+        reason_high_demand: "Suur koormus kulleritel",
+        reason_stock: "Kaup ei ole laos",
+        timeline_placed: "Tellitud",
+        timeline_confirmed: "Kinnitatud",
+        timeline_assembly: "Komplekteerimine",
+        timeline_shipping: "Teel",
+        timeline_delivered: "Kohale jõudnud",
+        tab_today: "Täna saabuvad",
+        tab_later: "Hiljem saabuvad",
+        items_count: "{count} toodet",
+        shipping_method: "Tarneviis",
+        shipping_address: "Aadress",
+        contact_receiver: "Saaja",
+        help_title: "Kas muretsed tellimuse pärast?",
+        help_desc: "Enamik tellimusi saabub õigeaegselt. Kui on mure, siis oleme siin.",
+        action_faq: "Loe korduma kippuvaid küsimusi",
+        action_video: "Kuidas me tarnime?",
+        action_cancel: "Tühista tellimus",
+        action_change_contact: "Muuda andmeid",
+        action_rate: "Hinda teenust",
+        action_repeat: "Telli uuesti",
+        problem_solved_eta: "Uus aeg: {time}"
+    },
+    delivery: {
+        reasons: {
+            COURIER_OVERLOAD: { title: "Kulleritel on suur koormus", description: "Täna on palju tellimusi, tarneaeg võib pikeneda." },
+            NO_COURIER_AVAILABLE: { title: "Vabu kullereid pole", description: "Otsime kullerit. Kui leiame, uuendame staatust." },
+            TRAFFIC_DELAY: { title: "Liiklusummikud", description: "Liikluse tõttu tarneaeg pikenes." },
+            WEATHER_DELAY: { title: "Ilmastikuolud", description: "Ilm mõjutab tarnekiirust. Anname uue aja." },
+            OUT_OF_STOCK: { title: "Toode on laost otsas", description: "Mõni toode on otsas. Pakume asendust või nihutame tarne." },
+            PARTIAL_STOCK: { title: "Osa tooteid on valmis", description: "Saame osa tuua täna ja ülejäänu hiljem." },
+            WAREHOUSE_DELAY: { title: "Lao viivitus", description: "Tellimuse komplekteerimine võtab kauem." },
+            PICKING_DELAY: { title: "Komplekteerimine käib", description: "Tooteid kogutakse. Uuendame peagi staatust." },
+            STORE_CONFIRMATION_DELAY: { title: "Ootame poe kinnitust", description: "Pood kinnitab tellimust." },
+            ADDRESS_CLARIFICATION_REQUIRED: { title: "Aadress vajab täpsustamist", description: "Palun kontrolli tänav/maja/korter." },
+            PHONE_UNREACHABLE: { title: "Telefonile ei saadud vastust", description: "Kontrolli telefoninumbrit — kuller võib helistada." },
+            CUSTOMER_REQUESTED_RESCHEDULE: { title: "Kliendi soovil ümber tõstetud", description: "Tarne tõsteti sobivamale ajale." },
+            CUSTOMER_CANCELLED: { title: "Kliendi poolt tühistatud", description: "Tellimus või tarne tühistati." },
+            PROVIDER_ERROR: { title: "Tarne teenuse viga", description: "Ei õnnestunud saada staatust/arvutust. Proovime uuesti." },
+            PAYMENT_ISSUE: { title: "Makse probleem", description: "Makse ei läinud läbi või vajab kinnitust." },
+            UNKNOWN: { title: "Vajab täpsustamist", description: "Kontrollime infot ja uuendame staatust." }
+        },
+        ux: {
+            COURIER_OVERLOAD: { title: "Kulleritel on suur koormus", description: "Otsime vaba kullerit. Teie tellimus on prioriteediks." },
+            NO_COURIER_AVAILABLE: { title: "Hetkel vabu kullereid ei leitud", description: "Otsime jätkuvalt. Anname märku, kui kuller on teel." },
+            TRAFFIC_DELAY: { title: "Liiklusummikud teel", description: "Kuller hilineb liikluse tõttu. Uus saabumisaeg selgub peagi." },
+            WEATHER_DELAY: { title: "Rasked ilmastikuolud", description: "Ilm mõjutab kohaletoimetamise kiirust. Sõidame ettevaatlikult." },
+
+            OUT_OF_STOCK: { title: "Toodet pole laos", description: "Kahjuks said mõned tooted otsa. Palun valige asendus või tühistage need tooted." },
+            PARTIAL_STOCK: { title: "Osaline tarne", description: "Osa kaupa on valmis, osa viibib. Saame tuua valmis osa kohe." },
+
+            WAREHOUSE_DELAY: { title: "Pikem ooteaeg laos", description: "Komplekteerimine võtab oodatust kauem. Tegeleme teie tellimusega." },
+            PICKING_DELAY: { title: "Komplekteerimine viibib", description: "Laos on palju tööd. Teeme kõik, et pakk kiiresti teele panna." },
+            STORE_CONFIRMATION_DELAY: { title: "Ootame poe kinnitust", description: "Pood pole veel tellimust kinnitanud. Võtame nendega ühendust." },
+
+            ADDRESS_CLARIFICATION_REQUIRED: { title: "Ei leia aadressi", description: "Kuller ei leia sihtkohta. Palun täpsustage aadress." },
+            PHONE_UNREACHABLE: { title: "Ei saa ühendust", description: "Kuller üritas helistada. Palun helistage tagasi või kontrollige numbrit." },
+
+            CUSTOMER_REQUESTED_RESCHEDULE: { title: "Tarne aeg muudetud", description: "Vastavalt teie soovile toimetame kauba kohale uuel ajal." },
+            CUSTOMER_CANCELLED: { title: "Tellimus tühistatud", description: "Teie soovil on tellimus tühistatud." },
+
+            PROVIDER_ERROR: { title: "Süsteemi viga", description: "Ei õnnestu saada ühendust tarnepartneriga. Proovime automaatselt uuesti." },
+            PAYMENT_ISSUE: { title: "Makse ebaõnnestus", description: "Palun kontrollige maksemeetodit või proovige uuesti." },
+            UNKNOWN: { title: "Täpsustame staatust", description: "Kontrollime infot ja uuendame staatust esimesel võimalusel." },
+
+            cta: {
+                fix_address: "Täpsusta aadressi",
+                confirm_phone: "Kinnita telefon",
+                pay_again: "Maksa uuesti",
+                resolve_stock: "Vaata valikuid",
+                retry_provider: "Proovi uuesti",
+                contact_support: "Võta ühendust",
+                none: ""
+            }
+        },
+        notifications: {
+            title: {
+                order_submitted: "Tellimus on esitatud",
+                dispatched: "Kuller on teel",
+                delivered: "Tellimus on tarnitud",
+                action_required: "Vajame sinu tegevust",
+                eta_changed: "Tarneaeg muutus"
+            },
+            body: {
+                order_submitted: "Kinnitame ja alustame komplekteerimist.",
+                dispatched: "Kuller on teel. Ootame kohaletoimetamist {eta_range}.",
+                delivered: "Materjalid on tarnitud. Aitäh, et valisid SmartBuild.",
+                action_required: "Vajame sinu tegevust, et tarne saaks jätkuda.",
+                eta_changed: "Tarneaeg muutus: {eta_range}."
+            },
+            empty: "Teateid pole",
+            mark_all_read: "Märgi kõik loetuks",
+            view_all: "Vaata kõiki",
+            new_badge: "Uus"
+        },
+        partners: {
+            title: "Vähem segadust. Rohkem müüki.",
+            subtitle: "SmartBuild edastab ainult kvaliteetsed ja struktureeritud päringud.",
+            how_it_works: {
+                title: "Kuidas see töötab?",
+                step1: "Klient valib tooted",
+                step2: "Määrab mahud",
+                step3: "Valib linna",
+                step4: "Saadab päringu"
+            },
+            demo_rfq: {
+                title: "Näidis päring",
+                city: "Linn",
+                items: "Tooted",
+                volume: "Maht",
+                deadline: "Tähtaeg",
+                client: "Klient",
+                example_city: "Tartu",
+                example_deadline: "Kiire",
+                example_client: "Ehitusfirma"
+            },
+            benefits: {
+                title: "Mida poed saavad?",
+                list: [
+                    "Vähem tühje päringuid",
+                    "Müügimeeskonna aja kokkuhoid",
+                    "Valmis ja konkreetsed kliendid",
+                    "Aus konkurents mahu pealt",
+                    "Turu analüütika ja statistika"
+                ]
+            },
+            allocation: {
+                title: "Tark jaotus",
+                text: "Päringud jaotatakse automaatselt vastavalt linnale ja koormusele. Ei mingit spämmimist."
+            },
+            analytics: {
+                title: "Turu ülevaade",
+                viz1: "Populaarsed tooted",
+                viz2: "Keskmine tellimus",
+                viz3: "Hinnatase"
+            },
+            cta: "Võta meiega ühendust"
+        },
+        delivery_partners: {
+            title: "Vähem tühistamisi. Rohkem kvaliteetseid tellimusi.",
+            subtitle: "SmartBuild filtreerib ehitusmaterjalide tellimused enne, kui need jõuavad kullerini.",
+            gate: {
+                title: "Smart Delivery Gate",
+                step1: "Klient loob korvi",
+                step2: "Automaatne arvutus",
+                step3: "Süsteem määrab",
+                step4: "Ainult sobivad tellimused",
+                caption: "Kuller ei saa sobimatut tellimust.",
+                types: {
+                    wolt: "Wolt sobilik",
+                    bolt: "Bolt sobilik",
+                    split: "Osaline tarne",
+                    store: "Ainult poe tarne",
+                    pickup: "Tulen ise järele"
+                }
+            },
+            reasons: {
+                title: "Miks tellimus ei sobi kiirtarneks?",
+                over_weight: "Kaal ületab lubatud piiri",
+                over_volume: "Maht ületab lubatud piiri",
+                stairs: "Puudub lift, liiga raske",
+                fragile: "Õrn toode (klaas, keraamika)",
+                category: "Kategooria ei ole toetatud"
+            },
+            split: {
+                title: "Osaline tarne — vähem probleeme",
+                desc: "Osa tellimusest sobib kiirtarneks, ülejäänu tarnib pood. Klient näeb seda ja kulleril pole üllatusi.",
+                example_store: "12 kotti tsementi — Pood tarnib",
+                example_express: "Tööriistad — Täna kohal"
+            },
+            benefits: {
+                title: "Mida kullerteenus saab?",
+                items: [
+                    "Vähem tühistamisi",
+                    "Vähem konflikte kättetoimetamisel",
+                    "Selged ja sobivad tellimused",
+                    "Uus kliendisement (ehitus)",
+                    "Etteaimatav koormus",
+                    "Vähem koormust klienditoele"
+                ]
+            },
+            pitch: {
+                title: "Kuidas me pakume koostööd",
+                text: "SmartBuild on ehitusmaterjalide tellimuste filter ja koordinaator. Me ei saada kulleritele sobimatuid tellimusi. Arvutame eelnevalt kaalu, mahu ja tingimused. Tarnele lähevad ainult reaalselt teostatavad tellimused. See vähendab tühistamisi ja avab uue turu."
+            },
+            cta: "Arutame koostööd",
+            cta_sub: "API-integratsioon arutatakse eraldi pärast MVP testimist."
+        }
     }
 };
 
@@ -741,5 +937,211 @@ export const RU_DICTIONARY: Dictionary = {
         phone: "+372 5555 1234",
         address: "Tallinn, Eesti",
         back_catalog: "В каталог"
+    },
+    order_details: {
+        status_in_progress: "Заказ в работе",
+        status_completed: "Заказ выполнен",
+        status_problem: "Задержка доставки",
+        eta_title: "Ожидается:",
+        eta_today: "Сегодня",
+        eta_tomorrow: "Завтра",
+        reason_high_demand: "Высокая нагрузка на курьеров",
+        reason_stock: "Товара нет на складе",
+        timeline_placed: "Оформлен",
+        timeline_confirmed: "Подтвержден",
+        timeline_assembly: "Сборка",
+        timeline_shipping: "В пути",
+        timeline_delivered: "Доставлен",
+        tab_today: "Сегодня",
+        tab_later: "Позже",
+        items_count: "{count} товаров",
+        shipping_method: "Способ доставки",
+        shipping_address: "Адрес",
+        contact_receiver: "Получатель",
+        help_title: "Волнуетесь о заказе?",
+        help_desc: "Большинство заказов приходит вовремя. Если что-то не так — мы поможем.",
+        action_faq: "Частые вопросы",
+        action_video: "Как работает доставка?",
+        action_cancel: "Отменить заказ",
+        action_change_contact: "Изменить данные",
+        action_rate: "Оценить доставку",
+        action_repeat: "Повторить заказ",
+        problem_solved_eta: "Новое время: {time}"
+    },
+    delivery: {
+        reasons: {
+            COURIER_OVERLOAD: { title: "Высокая нагрузка на курьеров", description: "Сегодня много заказов, поэтому доставка может занять больше времени." },
+            NO_COURIER_AVAILABLE: { title: "Нет свободных курьеров", description: "Мы ищем курьера. Как только найдём — статус обновится." },
+            TRAFFIC_DELAY: { title: "Пробки на дорогах", description: "Из-за трафика время доставки увеличилось." },
+            WEATHER_DELAY: { title: "Погодные условия", description: "Погода влияет на скорость доставки. Мы сообщим обновлённое время." },
+            OUT_OF_STOCK: { title: "Нет товара в наличии", description: "Один или несколько товаров закончились. Предложим замену или перенесём доставку." },
+            PARTIAL_STOCK: { title: "Часть товаров готова", description: "Можно доставить часть сегодня, остальное позже." },
+            WAREHOUSE_DELAY: { title: "Задержка на складе", description: "Сборка заказа займёт больше времени." },
+            PICKING_DELAY: { title: "Идёт комплектация", description: "Товары собираются. Мы обновим статус, когда будет готово." },
+            STORE_CONFIRMATION_DELAY: { title: "Ожидаем подтверждение магазина", description: "Магазин ещё подтверждает заказ." },
+            ADDRESS_CLARIFICATION_REQUIRED: { title: "Нужно уточнить адрес", description: "Проверьте улицу/дом/квартиру — мы не хотим ошибиться." },
+            PHONE_UNREACHABLE: { title: "Не удалось дозвониться", description: "Проверьте номер телефона или включите звук — курьер может звонить." },
+            CUSTOMER_REQUESTED_RESCHEDULE: { title: "Перенос по просьбе клиента", description: "Доставка перенесена на удобное время." },
+            CUSTOMER_CANCELLED: { title: "Отменено клиентом", description: "Заказ или доставка отменены." },
+            PROVIDER_ERROR: { title: "Ошибка сервиса доставки", description: "Не удалось получить расчёт/статус. Попробуем снова." },
+            PAYMENT_ISSUE: { title: "Проблема с оплатой", description: "Оплата не прошла или требует подтверждения." },
+            UNKNOWN: { title: "Требуется уточнение", description: "Мы проверяем информацию и скоро обновим статус." }
+        },
+        ux: {
+            COURIER_OVERLOAD: { title: "Высокая нагрузка на курьеров", description: "Сейчас много заказов. Мы ищем свободного курьера." },
+            NO_COURIER_AVAILABLE: { title: "Нет свободных курьеров", description: "Мы продолжаем поиск. Сообщим, как только машина выедет." },
+            TRAFFIC_DELAY: { title: "Задержка из-за пробок", description: "Курьер стоит в пробке. Время доставки немного сдвигается." },
+            WEATHER_DELAY: { title: "Погодные условия", description: "Из-за погоды доставка может занять больше времени. Мы стараемся успеть." },
+
+            OUT_OF_STOCK: { title: "Товара нет в наличии", description: "Некоторые позиции закончились. Выберите замену или частичную доставку." },
+            PARTIAL_STOCK: { title: "Частичная готовность", description: "Часть заказа готова. Мы можем доставить её сейчас, а остальное позже." },
+
+            WAREHOUSE_DELAY: { title: "Задержка на складе", description: "Сборка занимает больше времени, чем обычно. Работаем над этим." },
+            PICKING_DELAY: { title: "Задержка комплектации", description: "Сотрудники склада перегружены. Ваш заказ скоро будет собран." },
+            STORE_CONFIRMATION_DELAY: { title: "Ждём ответ магазина", description: "Магазин долго не подтверждает заказ. Мы выясняем причину." },
+
+            ADDRESS_CLARIFICATION_REQUIRED: { title: "Уточните адрес", description: "Курьер не может найти дом/вход. Пожалуйста, проверьте данные." },
+            PHONE_UNREACHABLE: { title: "Не дозвониться", description: "Курьер звонил, но никто не ответил. Пожалуйста, перезвоните или проверьте номер." },
+
+            CUSTOMER_REQUESTED_RESCHEDULE: { title: "Доставка перенесена", description: "Время доставки изменено по вашему запросу." },
+            CUSTOMER_CANCELLED: { title: "Заказ отменён", description: "Вы отменили этот заказ." },
+
+            PROVIDER_ERROR: { title: "Ошибка системы доставки", description: "Не удалось обновить статус. Система попробует снова автоматически." },
+            PAYMENT_ISSUE: { title: "Ошибка оплаты", description: "Платёж не прошёл. Попробуйте оплатить снова." },
+            UNKNOWN: { title: "Проверяем статус", description: "Мы уточняем информацию по заказу и скоро обновим данные." },
+
+            cta: {
+                fix_address: "Исправить адрес",
+                confirm_phone: "Подтвердить номер",
+                pay_again: "Оплатить снова",
+                resolve_stock: "Решить проблему",
+                retry_provider: "Повторить",
+                contact_support: "Написать в поддержку",
+                none: ""
+            }
+        },
+        notifications: {
+            title: {
+                order_submitted: "Заказ оформлен",
+                dispatched: "Курьер в пути",
+                delivered: "Заказ доставлен",
+                action_required: "Нужно ваше действие",
+                eta_changed: "Изменилось время доставки"
+            },
+            body: {
+                order_submitted: "Мы подтвердим и начнём сборку.",
+                dispatched: "Курьер в пути. Ожидаем доставку {eta_range}.",
+                delivered: "Материалы доставлены. Спасибо, что выбрали SmartBuild.",
+                action_required: "Нужно ваше действие, чтобы продолжить доставку.",
+                eta_changed: "Изменилось время доставки: {eta_range}."
+            },
+            empty: "Нет уведомлений",
+            mark_all_read: "Пометить все прочитанными",
+            view_all: "Смотреть все",
+            new_badge: "Новое"
+        },
+        partners: {
+            title: "Меньше хаоса. Больше продаж.",
+            subtitle: "SmartBuild передаёт только структурированные и готовые заявки.",
+            how_it_works: {
+                title: "Как это работает?",
+                step1: "Клиент выбирает товары",
+                step2: "Указывает объёмы",
+                step3: "Выбирает город",
+                step4: "Отправляет запрос"
+            },
+            demo_rfq: {
+                title: "Пример заявки",
+                city: "Город",
+                items: "Товаров",
+                volume: "Объём",
+                deadline: "Срок",
+                client: "Клиент",
+                example_city: "Тарту",
+                example_deadline: "Срочно",
+                example_client: "Строитель"
+            },
+            benefits: {
+                title: "Что получают магазины?",
+                list: [
+                    "Меньше пустых и неточных запросов",
+                    "Экономия времени менеджеров",
+                    "Готовые к покупке клиенты",
+                    "Честная конкуренция по объёму",
+                    "Аналитика рынка и трендов"
+                ]
+            },
+            allocation: {
+                title: "Умное распределение",
+                text: "Заявки распределяются автоматически по городу и загрузке менеджеров."
+            },
+            analytics: {
+                title: "Аналитика рынка",
+                viz1: "Популярные товары",
+                viz2: "Средний чек",
+                viz3: "Сравнение цен"
+            },
+            allocation: {
+                title: "Умное распределение",
+                text: "Заявки распределяются автоматически по городу и загрузке менеджеров."
+            },
+            analytics: {
+                title: "Аналитика рынка",
+                viz1: "Популярные товары",
+                viz2: "Средний чек",
+                viz3: "Сравнение цен"
+            },
+            cta: "Связаться с нами"
+        },
+        delivery_partners: {
+            title: "Меньше отмен. Больше качественных заказов.",
+            subtitle: "SmartBuild фильтрует заказы на стройматериалы до того, как они попадут курьеру.",
+            gate: {
+                title: "Smart Delivery Gate",
+                step1: "Клиент собирает корзину",
+                step2: "Авторасчёт параметров",
+                step3: "Система присваивает тип",
+                step4: "Только подходящие заказы",
+                caption: "Курьер не получает неподходящий заказ.",
+                types: {
+                    wolt: "Wolt подходит",
+                    bolt: "Bolt подходит",
+                    split: "Частичная доставка",
+                    store: "Только магазин",
+                    pickup: "Самовывоз"
+                }
+            },
+            reasons: {
+                title: "Почему заказ не подходит для экспресс-доставки?",
+                over_weight: "Вес превышает лимит",
+                over_volume: "Объём превышает лимит",
+                stairs: "Нет лифта, тяжелый груз",
+                fragile: "Хрупкий товар",
+                category: "Категория не поддерживается"
+            },
+            split: {
+                title: "Частичная доставка — меньше проблем",
+                desc: "Часть заказа подходит для экспресс-доставки, остальное — доставка магазина. Клиент видит это заранее, курьер не сталкивается с сюрпризами.",
+                example_store: "12 мешков цемента — Доставка магазином",
+                example_express: "Инструменты — Wolt сегодня"
+            },
+            benefits: {
+                title: "Что получает доставка?",
+                items: [
+                    "Меньше отмен",
+                    "Меньше конфликтов",
+                    "Понятные заказы",
+                    "Новый сегмент клиентов (строительство)",
+                    "Предсказуемая нагрузка",
+                    "Меньше нагрузки на поддержку"
+                ]
+            },
+            pitch: {
+                title: "Как мы предлагаем сотрудничество",
+                text: "SmartBuild — это фильтр и координатор заказов на стройматериалы. Мы не отправляем курьерам неподходящие заказы. Мы заранее считаем вес, объём и условия доставки. В доставку попадают только те заказы, которые реально можно выполнить. Это снижает отмены, поддержку и негатив, и открывает новый рынок строительных доставок."
+            },
+            cta: "Обсудить сотрудничество",
+            cta_sub: "API-интеграция обсуждается после тестирования MVP."
+        }
     }
 };

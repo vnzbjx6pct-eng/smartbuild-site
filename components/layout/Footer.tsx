@@ -25,7 +25,8 @@ export default function Footer() {
                     <ul className="text-sm space-y-2">
                         <li><Link href="/meist" className="hover:text-white">{(t as any).footer?.about_us ?? "Meist"}</Link></li>
                         <li><Link href="/contact" className="hover:text-white">{(t as any).footer?.contact ?? "Kontakt"}</Link></li>
-                        <li><Link href="/partner/plans" className="hover:text-emerald-400 text-emerald-500/80">{(t as any).footer?.partners ?? "Partneritele"}</Link></li>
+                        <li><Link href="/partners" className="hover:text-emerald-400 text-emerald-500/80">{(t as any).footer?.partners ?? "Partneritele"}</Link></li>
+                        <li><Link href="/delivery-partners" className="hover:text-blue-400 text-blue-500/80">Delivery Partners</Link></li>
                     </ul>
                 </div>
                 <div>

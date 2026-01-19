@@ -5,6 +5,7 @@ import NavbarCartLink from "./NavbarCartLink";
 import HeaderAuth from "./HeaderAuth";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
+import NotificationBell from "@/components/notifications/NotificationBell";
 
 export default function Header() {
     const { t } = useLanguage();
@@ -30,6 +31,7 @@ export default function Header() {
                         {(t as any).footer?.catalog ?? "Kataloog"}
                     </Link>
                     <NavbarCartLink />
+                    <NotificationBell />
                     <div className="h-5 w-px bg-slate-700"></div>
                     <HeaderAuth />
                 </nav>

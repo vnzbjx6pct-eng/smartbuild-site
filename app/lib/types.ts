@@ -188,7 +188,10 @@ export interface Shipment {
     fee: number;
     provider?: string;
     provider_reference?: string;
+    // Reason Codes
     status_reason_code?: string;
+    status_reason_details?: string;
+
     created_at: string;
     // Relations
     events?: ShipmentEvent[];
@@ -199,5 +202,46 @@ export interface ShipmentEvent {
     shipment_id: string;
     event_status: string;
     message?: string;
+    reason_code?: string;
+    visibility?: 'public' | 'internal';
+    created_at: string;
+}
+
+export interface NotificationSettings {
+    user_id: string;
+    email_enabled: boolean;
+    inapp_enabled: boolean;
+    notify_all_updates: boolean;
+    quiet_hours_start?: number;
+    quiet_hours_end?: number;
+    language_preference?: 'et' | 'ru';
+    created_at: string;
+    updated_at: string;
+}
+
+export interface Notification {
+    id: string;
+    user_id: string;
+    type: 'order_submitted' | 'shipment_status' | 'eta_change' | 'action_required' | 'partial_delivery' | 'system';
+    severity: 'info' | 'warning' | 'action_required' | 'error';
+    title_key?: string;
+    body_key?: string;
+    title_text?: string;
+    body_text?: string;
+    payload?: any;
+    is_read: boolean;
+    channels: string[];
+    dedup_key?: string;
+    created_at: string;
+}
+
+export interface NotificationEvent {
+    id: string;
+    notification_id: string;
+    channel: 'inapp' | 'email';
+    status: 'queued' | 'sent' | 'failed';
+    provider?: string;
+    provider_id?: string;
+    error?: string;
     created_at: string;
 }
