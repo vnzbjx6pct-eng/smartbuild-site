@@ -10,7 +10,6 @@ import {
     Split,
     CheckCircle2,
     ArrowRight,
-    PackageCheck,
     AlertTriangle,
     Boxes,
     ServerCog,
@@ -18,10 +17,13 @@ import {
     Send
 } from "lucide-react";
 import Link from "next/link";
+import { Dictionary } from "@/app/lib/i18n/types";
 
 export default function DeliveryPartnersPage() {
     const { t } = useLanguage();
-    const txt = (t as any).delivery_partners;
+    // Use type assertion carefully or assume t is typed. If t is Dictionary, access should be safe?
+    // If t is unknown, assert as Dictionary.
+    const txt = t.delivery_partners;
 
     if (!txt) return null;
 
@@ -239,7 +241,7 @@ export default function DeliveryPartnersPage() {
     );
 }
 
-function ReasonCard({ code, icon: Icon, text }: { code: string, icon: any, text: string }) {
+function ReasonCard({ code, icon: Icon, text }: { code: string, icon: React.ElementType, text: string }) {
     return (
         <div className="p-6 rounded-xl border border-rose-100 bg-rose-50/30 flex items-start gap-4 hover:border-rose-200 transition-colors">
             <div className="shrink-0 p-2 bg-rose-100 rounded-lg text-rose-600">

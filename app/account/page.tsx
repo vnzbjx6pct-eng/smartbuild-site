@@ -3,11 +3,28 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/app/lib/supabaseClient";
 import Link from "next/link";
-import { Package, Truck, Clock } from "lucide-react";
+import { Truck, Clock } from "lucide-react";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 
+interface OrderItem {
+    id: string;
+    name: string;
+    qty: number;
+    price: number;
+    unit: string;
+    line_total: number;
+}
+
+interface Order {
+    id: string;
+    created_at: string;
+    total: number;
+    status: string;
+    items: OrderItem[];
+}
+
 export default function AccountOverview() {
-    const [lastOrder, setLastOrder] = useState<any>(null);
+    const [lastOrder, setLastOrder] = useState<Order | null>(null);
     const [loading, setLoading] = useState(true);
     const { t } = useLanguage();
 
@@ -107,7 +124,7 @@ export default function AccountOverview() {
                             </div>
                         </div>
                         <div className="space-y-2">
-                            {lastOrder.items?.slice(0, 3).map((item: any) => (
+                            {lastOrder.items?.slice(0, 3).map((item) => (
                                 <div key={item.id} className="flex justify-between text-sm">
                                     <span className="text-slate-600">{item.qty}x {item.name}</span>
                                     <span className="font-medium text-slate-900">{item.line_total} €</span>

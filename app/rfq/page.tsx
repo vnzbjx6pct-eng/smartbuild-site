@@ -150,9 +150,10 @@ export default function RFQWizardPage() {
             if (window.innerWidth < 768) track("mobile_rfq_completed");
             clear();
             window.scrollTo(0, 0);
-        } catch (err: any) {
-            logFunnel("RFQ_ERROR", err.message);
-            alert("Viga: " + err.message);
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            logFunnel("RFQ_ERROR", message);
+            alert("Viga: " + message);
         } finally {
             setLoading(false);
         }

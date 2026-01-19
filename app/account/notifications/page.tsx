@@ -37,8 +37,8 @@ export default function NotificationsPage() {
     };
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        fetchNotifications();
+
+        setTimeout(() => fetchNotifications(), 0);
     }, []);
 
     const filteredNotifications = useMemo(() => {

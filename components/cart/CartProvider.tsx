@@ -30,8 +30,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         try {
             const stored = localStorage.getItem("sb_cart");
             if (stored) {
-                // eslint-disable-next-line react-hooks/exhaustive-deps
-                setItems(JSON.parse(stored));
+
+                setTimeout(() => setItems(JSON.parse(stored)), 0);
             }
         } catch (e) {
             console.error("Failed to load cart", e);

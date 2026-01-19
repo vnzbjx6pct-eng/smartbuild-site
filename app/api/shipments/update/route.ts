@@ -1,20 +1,33 @@
-import type { NextRequest} from "next/server";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { notifyOnShipmentChange } from "@/app/lib/notifications/service";
 import type { DeliveryReasonCode } from "@/app/lib/delivery/reasonCodes";
-import { ShipmentStatus } from "@/app/lib/types";
+
+interface ShipmentUpdateBody {
+    shipmentId?: string;
+    status?: string;
+    message?: string;
+    reasonCode?: DeliveryReasonCode;
+    visibility?: 'public' | 'internal';
+}
 
 // Admin/Partner/Webhook endpoint
 export async function POST(req: NextRequest) {
     // Lazy init for static build safety
-    const supabaseAdmin = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const sbUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!sbUrl || !sbKey) {
+        console.error("Missing Supabase URL or Service Role Key");
+        return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
+    }
+
+    const supabaseAdmin = createClient(sbUrl, sbKey);
 
     try {
-        const body = await req.json();
+        const json: unknown = await req.json();
+        const body = json as ShipmentUpdateBody;
         const { shipmentId, status, message, reasonCode, visibility = 'public' } = body;
 
         if (!shipmentId || !status) {
@@ -22,7 +35,7 @@ export async function POST(req: NextRequest) {
         }
 
         // 1. Update Shipment
-        const shipmentUpdateData: any = { status };
+        const shipmentUpdateData: Record<string, unknown> = { status };
 
         // If providing a new reason code (even if null to clear), update it
         if (reasonCode !== undefined) {
@@ -87,8 +100,9 @@ export async function POST(req: NextRequest) {
         }
 
         return NextResponse.json({ success: true });
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error("Error updating shipment:", err);
-        return NextResponse.json({ error: err.message }, { status: 500 });
+        const errMsg = err instanceof Error ? err.message : "Unknown Error";
+        return NextResponse.json({ error: errMsg }, { status: 500 });
     }
 }

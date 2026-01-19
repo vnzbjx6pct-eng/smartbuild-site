@@ -1,8 +1,8 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import type { UserSession} from "@/app/actions/auth";
-import { getSession, login as serverLogin, logout as serverLogout } from "@/app/actions/auth";
+import type { UserSession } from "@/app/actions/auth";
+import { login as serverLogin, logout as serverLogout } from "@/app/actions/auth";
 import { supabase, signInWithOAuth, isDemoMode } from "@/app/lib/supabaseClient";
 
 type UserContextType = {
@@ -49,15 +49,17 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         init();
 
         // 2. Subscribe to changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event: string, session: any) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event: string, session: unknown) => {
             console.log("Auth State Change:", event);
-            if (session?.user) {
+            // Safe cast after unknown
+            const user = (session as any)?.user;
+            if (user) {
                 setUser({
-                    id: session.user.id,
-                    email: session.user.email || "",
-                    name: session.user.user_metadata?.full_name || session.user.user_metadata?.name,
-                    city: session.user.user_metadata?.city,
-                    createdAt: new Date(session.user.created_at).getTime(),
+                    id: user.id,
+                    email: user.email || "",
+                    name: user.user_metadata?.full_name || user.user_metadata?.name,
+                    city: user.user_metadata?.city,
+                    createdAt: new Date(user.created_at).getTime(),
                 });
                 setLoading(false);
             } else if (event === 'SIGNED_OUT') {

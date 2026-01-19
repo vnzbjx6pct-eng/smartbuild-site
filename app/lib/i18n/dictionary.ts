@@ -1,6 +1,9 @@
-export type Dictionary = typeof ET_DICTIONARY;
+import { DeliveryReasonCode } from "@/app/lib/delivery/reasonCodes";
+import type { Dictionary } from "./types";
 
-export const ET_DICTIONARY = {
+export type { Dictionary, Locale } from "./types";
+
+export const ET_DICTIONARY: Dictionary = {
     common: {
         login: "Logi sisse",
         register: "Registreeri",
@@ -402,45 +405,45 @@ export const ET_DICTIONARY = {
     },
     delivery: {
         reasons: {
-            COURIER_OVERLOAD: { title: "Kulleritel on suur koormus", description: "Täna on palju tellimusi, tarneaeg võib pikeneda." },
-            NO_COURIER_AVAILABLE: { title: "Vabu kullereid pole", description: "Otsime kullerit. Kui leiame, uuendame staatust." },
-            TRAFFIC_DELAY: { title: "Liiklusummikud", description: "Liikluse tõttu tarneaeg pikenes." },
-            WEATHER_DELAY: { title: "Ilmastikuolud", description: "Ilm mõjutab tarnekiirust. Anname uue aja." },
-            OUT_OF_STOCK: { title: "Toode on laost otsas", description: "Mõni toode on otsas. Pakume asendust või nihutame tarne." },
-            PARTIAL_STOCK: { title: "Osa tooteid on valmis", description: "Saame osa tuua täna ja ülejäänu hiljem." },
-            WAREHOUSE_DELAY: { title: "Lao viivitus", description: "Tellimuse komplekteerimine võtab kauem." },
-            PICKING_DELAY: { title: "Komplekteerimine käib", description: "Tooteid kogutakse. Uuendame peagi staatust." },
-            STORE_CONFIRMATION_DELAY: { title: "Ootame poe kinnitust", description: "Pood kinnitab tellimust." },
-            ADDRESS_CLARIFICATION_REQUIRED: { title: "Aadress vajab täpsustamist", description: "Palun kontrolli tänav/maja/korter." },
-            PHONE_UNREACHABLE: { title: "Telefonile ei saadud vastust", description: "Kontrolli telefoninumbrit — kuller võib helistada." },
-            CUSTOMER_REQUESTED_RESCHEDULE: { title: "Kliendi soovil ümber tõstetud", description: "Tarne tõsteti sobivamale ajale." },
-            CUSTOMER_CANCELLED: { title: "Kliendi poolt tühistatud", description: "Tellimus või tarne tühistati." },
-            PROVIDER_ERROR: { title: "Tarne teenuse viga", description: "Ei õnnestunud saada staatust/arvutust. Proovime uuesti." },
-            PAYMENT_ISSUE: { title: "Makse probleem", description: "Makse ei läinud läbi või vajab kinnitust." },
-            UNKNOWN: { title: "Vajab täpsustamist", description: "Kontrollime infot ja uuendame staatust." }
+            [DeliveryReasonCode.COURIER_OVERLOAD]: { title: "Kulleritel on suur koormus", description: "Täna on palju tellimusi, tarneaeg võib pikeneda." },
+            [DeliveryReasonCode.NO_COURIER_AVAILABLE]: { title: "Vabu kullereid pole", description: "Otsime kullerit. Kui leiame, uuendame staatust." },
+            [DeliveryReasonCode.TRAFFIC_DELAY]: { title: "Liiklusummikud", description: "Liikluse tõttu tarneaeg pikenes." },
+            [DeliveryReasonCode.WEATHER_DELAY]: { title: "Ilmastikuolud", description: "Ilm mõjutab tarnekiirust. Anname uue aja." },
+            [DeliveryReasonCode.OUT_OF_STOCK]: { title: "Toode on laost otsas", description: "Mõni toode on otsas. Pakume asendust või nihutame tarne." },
+            [DeliveryReasonCode.PARTIAL_STOCK]: { title: "Osa tooteid on valmis", description: "Saame osa tuua täna ja ülejäänu hiljem." },
+            [DeliveryReasonCode.WAREHOUSE_DELAY]: { title: "Lao viivitus", description: "Tellimuse komplekteerimine võtab kauem." },
+            [DeliveryReasonCode.PICKING_DELAY]: { title: "Komplekteerimine käib", description: "Tooteid kogutakse. Uuendame peagi staatust." },
+            [DeliveryReasonCode.STORE_CONFIRMATION_DELAY]: { title: "Ootame poe kinnitust", description: "Pood kinnitab tellimust." },
+            [DeliveryReasonCode.ADDRESS_CLARIFICATION_REQUIRED]: { title: "Aadress vajab täpsustamist", description: "Palun kontrolli tänav/maja/korter." },
+            [DeliveryReasonCode.PHONE_UNREACHABLE]: { title: "Telefonile ei saadud vastust", description: "Kontrolli telefoninumbrit — kuller võib helistada." },
+            [DeliveryReasonCode.CUSTOMER_REQUESTED_RESCHEDULE]: { title: "Kliendi soovil ümber tõstetud", description: "Tarne tõsteti sobivamale ajale." },
+            [DeliveryReasonCode.CUSTOMER_CANCELLED]: { title: "Kliendi poolt tühistatud", description: "Tellimus või tarne tühistati." },
+            [DeliveryReasonCode.PROVIDER_ERROR]: { title: "Tarne teenuse viga", description: "Ei õnnestunud saada staatust/arvutust. Proovime uuesti." },
+            [DeliveryReasonCode.PAYMENT_ISSUE]: { title: "Makse probleem", description: "Makse ei läinud läbi või vajab kinnitust." },
+            [DeliveryReasonCode.UNKNOWN]: { title: "Vajab täpsustamist", description: "Kontrollime infot ja uuendame staatust." }
         },
         ux: {
-            COURIER_OVERLOAD: { title: "Kulleritel on suur koormus", description: "Otsime vaba kullerit. Teie tellimus on prioriteediks." },
-            NO_COURIER_AVAILABLE: { title: "Hetkel vabu kullereid ei leitud", description: "Otsime jätkuvalt. Anname märku, kui kuller on teel." },
-            TRAFFIC_DELAY: { title: "Liiklusummikud teel", description: "Kuller hilineb liikluse tõttu. Uus saabumisaeg selgub peagi." },
-            WEATHER_DELAY: { title: "Rasked ilmastikuolud", description: "Ilm mõjutab kohaletoimetamise kiirust. Sõidame ettevaatlikult." },
+            [DeliveryReasonCode.COURIER_OVERLOAD]: { title: "Kulleritel on suur koormus", description: "Otsime vaba kullerit. Teie tellimus on prioriteediks." },
+            [DeliveryReasonCode.NO_COURIER_AVAILABLE]: { title: "Hetkel vabu kullereid ei leitud", description: "Otsime jätkuvalt. Anname märku, kui kuller on teel." },
+            [DeliveryReasonCode.TRAFFIC_DELAY]: { title: "Liiklusummikud teel", description: "Kuller hilineb liikluse tõttu. Uus saabumisaeg selgub peagi." },
+            [DeliveryReasonCode.WEATHER_DELAY]: { title: "Rasked ilmastikuolud", description: "Ilm mõjutab kohaletoimetamise kiirust. Sõidame ettevaatlikult." },
 
-            OUT_OF_STOCK: { title: "Toodet pole laos", description: "Kahjuks said mõned tooted otsa. Palun valige asendus või tühistage need tooted." },
-            PARTIAL_STOCK: { title: "Osaline tarne", description: "Osa kaupa on valmis, osa viibib. Saame tuua valmis osa kohe." },
+            [DeliveryReasonCode.OUT_OF_STOCK]: { title: "Toodet pole laos", description: "Kahjuks said mõned tooted otsa. Palun valige asendus или tühistage need tooted." },
+            [DeliveryReasonCode.PARTIAL_STOCK]: { title: "Osaline tarne", description: "Osa kaupa on valmis, osa viibib. Saame tuua valmis osa kohe." },
 
-            WAREHOUSE_DELAY: { title: "Pikem ooteaeg laos", description: "Komplekteerimine võtab oodatust kauem. Tegeleme teie tellimusega." },
-            PICKING_DELAY: { title: "Komplekteerimine viibib", description: "Laos on palju tööd. Teeme kõik, et pakk kiiresti teele panna." },
-            STORE_CONFIRMATION_DELAY: { title: "Ootame poe kinnitust", description: "Pood pole veel tellimust kinnitanud. Võtame nendega ühendust." },
+            [DeliveryReasonCode.WAREHOUSE_DELAY]: { title: "Pikem ooteaeg laos", description: "Komplekteerimine võtab oodatust kauem. Tegeleme teie tellimusega." },
+            [DeliveryReasonCode.PICKING_DELAY]: { title: "Komplekteerimine viibib", description: "Laos on palju tööd. Teeme kõik, et pakk kiiresti teele panna." },
+            [DeliveryReasonCode.STORE_CONFIRMATION_DELAY]: { title: "Ootame poe kinnitust", description: "Pood pole veel tellimust kinnitanud. Võtame nendega ühendust." },
 
-            ADDRESS_CLARIFICATION_REQUIRED: { title: "Ei leia aadressi", description: "Kuller ei leia sihtkohta. Palun täpsustage aadress." },
-            PHONE_UNREACHABLE: { title: "Ei saa ühendust", description: "Kuller üritas helistada. Palun helistage tagasi või kontrollige numbrit." },
+            [DeliveryReasonCode.ADDRESS_CLARIFICATION_REQUIRED]: { title: "Ei leia aadressi", description: "Kuller ei leia sihtkohta. Palun täpsustage aadress." },
+            [DeliveryReasonCode.PHONE_UNREACHABLE]: { title: "Ei saa ühendust", description: "Kuller üritas helistada. Palun helistage tagasi või kontrollige numbrit." },
 
-            CUSTOMER_REQUESTED_RESCHEDULE: { title: "Tarne aeg muudetud", description: "Vastavalt teie soovile toimetame kauba kohale uuel ajal." },
-            CUSTOMER_CANCELLED: { title: "Tellimus tühistatud", description: "Teie soovil on tellimus tühistatud." },
+            [DeliveryReasonCode.CUSTOMER_REQUESTED_RESCHEDULE]: { title: "Tarne aeg muudetud", description: "Vastavalt teie soovile toimetame kauba kohale uuel ajal." },
+            [DeliveryReasonCode.CUSTOMER_CANCELLED]: { title: "Tellimus tühistatud", description: "Teie soovil on tellimus tühistatud." },
 
-            PROVIDER_ERROR: { title: "Süsteemi viga", description: "Ei õnnestu saada ühendust tarnepartneriga. Proovime automaatselt uuesti." },
-            PAYMENT_ISSUE: { title: "Makse ebaõnnestus", description: "Palun kontrollige maksemeetodit või proovige uuesti." },
-            UNKNOWN: { title: "Täpsustame staatust", description: "Kontrollime infot ja uuendame staatust esimesel võimalusel." },
+            [DeliveryReasonCode.PROVIDER_ERROR]: { title: "Süsteemi viga", description: "Ei õnnestu saada ühendust tarnepartneriga. Proovime automaatselt uuesti." },
+            [DeliveryReasonCode.PAYMENT_ISSUE]: { title: "Makse ebaõnnestus", description: "Palun kontrollige maksemeetodit või proovige uuesti." },
+            [DeliveryReasonCode.UNKNOWN]: { title: "Täpsustame staatust", description: "Kontrollime infot ja uuendame staatust esimesel võimalusel." },
 
             cta: {
                 fix_address: "Täpsusta aadressi",
@@ -1060,45 +1063,45 @@ export const RU_DICTIONARY: Dictionary = {
     },
     delivery: {
         reasons: {
-            COURIER_OVERLOAD: { title: "Высокая нагрузка на курьеров", description: "Сегодня много заказов, поэтому доставка может занять больше времени." },
-            NO_COURIER_AVAILABLE: { title: "Нет свободных курьеров", description: "Мы ищем курьера. Как только найдём — статус обновится." },
-            TRAFFIC_DELAY: { title: "Пробки на дорогах", description: "Из-за трафика время доставки увеличилось." },
-            WEATHER_DELAY: { title: "Погодные условия", description: "Погода влияет на скорость доставки. Мы сообщим обновлённое время." },
-            OUT_OF_STOCK: { title: "Нет товара в наличии", description: "Один или несколько товаров закончились. Предложим замену или перенесём доставку." },
-            PARTIAL_STOCK: { title: "Часть товаров готова", description: "Можно доставить часть сегодня, остальное позже." },
-            WAREHOUSE_DELAY: { title: "Задержка на складе", description: "Сборка заказа займёт больше времени." },
-            PICKING_DELAY: { title: "Идёт комплектация", description: "Товары собираются. Мы обновим статус, когда будет готово." },
-            STORE_CONFIRMATION_DELAY: { title: "Ожидаем подтверждение магазина", description: "Магазин ещё подтверждает заказ." },
-            ADDRESS_CLARIFICATION_REQUIRED: { title: "Нужно уточнить адрес", description: "Проверьте улицу/дом/квартиру — мы не хотим ошибиться." },
-            PHONE_UNREACHABLE: { title: "Не удалось дозвониться", description: "Проверьте номер телефона или включите звук — курьер может звонить." },
-            CUSTOMER_REQUESTED_RESCHEDULE: { title: "Перенос по просьбе клиента", description: "Доставка перенесена на удобное время." },
-            CUSTOMER_CANCELLED: { title: "Отменено клиентом", description: "Заказ или доставка отменены." },
-            PROVIDER_ERROR: { title: "Ошибка сервиса доставки", description: "Не удалось получить расчёт/статус. Попробуем снова." },
-            PAYMENT_ISSUE: { title: "Проблема с оплатой", description: "Оплата не прошла или требует подтверждения." },
-            UNKNOWN: { title: "Требуется уточнение", description: "Мы проверяем информацию и скоро обновим статус." }
+            [DeliveryReasonCode.COURIER_OVERLOAD]: { title: "Высокая нагрузка на курьеров", description: "Сегодня много заказов, поэтому доставка может занять больше времени." },
+            [DeliveryReasonCode.NO_COURIER_AVAILABLE]: { title: "Нет свободных курьеров", description: "Мы ищем курьера. Как только найдём — статус обновится." },
+            [DeliveryReasonCode.TRAFFIC_DELAY]: { title: "Пробки на дорогах", description: "Из-за трафика время доставки увеличилось." },
+            [DeliveryReasonCode.WEATHER_DELAY]: { title: "Погодные условия", description: "Погода влияет на скорость доставки. Мы сообщим обновлённое время." },
+            [DeliveryReasonCode.OUT_OF_STOCK]: { title: "Нет товара в наличии", description: "Один или несколько товаров закончились. Предложим замену или перенесём доставку." },
+            [DeliveryReasonCode.PARTIAL_STOCK]: { title: "Часть товаров готова", description: "Можно доставить часть сегодня, остальное позже." },
+            [DeliveryReasonCode.WAREHOUSE_DELAY]: { title: "Задержка на складе", description: "Сборка заказа займёт больше времени." },
+            [DeliveryReasonCode.PICKING_DELAY]: { title: "Идёт комплектация", description: "Товары собираются. Мы обновим статус, когда будет готово." },
+            [DeliveryReasonCode.STORE_CONFIRMATION_DELAY]: { title: "Ожидаем подтверждение магазина", description: "Магазин ещё подтверждает заказ." },
+            [DeliveryReasonCode.ADDRESS_CLARIFICATION_REQUIRED]: { title: "Нужно уточнить адрес", description: "Проверьте улицу/дом/квартиру — мы не хотим ошибиться." },
+            [DeliveryReasonCode.PHONE_UNREACHABLE]: { title: "Не удалось дозвониться", description: "Проверьте номер телефона или включите звук — курьер может звонить." },
+            [DeliveryReasonCode.CUSTOMER_REQUESTED_RESCHEDULE]: { title: "Перенос по просьбе клиента", description: "Доставка перенесена на удобное время." },
+            [DeliveryReasonCode.CUSTOMER_CANCELLED]: { title: "Отменено клиентом", description: "Заказ или доставка отменены." },
+            [DeliveryReasonCode.PROVIDER_ERROR]: { title: "Ошибка сервиса доставки", description: "Не удалось получить расчёт/статус. Попробуем снова." },
+            [DeliveryReasonCode.PAYMENT_ISSUE]: { title: "Проблема с оплатой", description: "Оплата не прошла или требует подтверждения." },
+            [DeliveryReasonCode.UNKNOWN]: { title: "Требуется уточнение", description: "Мы проверяем информацию и скоро обновим статус." }
         },
         ux: {
-            COURIER_OVERLOAD: { title: "Высокая нагрузка на курьеров", description: "Сейчас много заказов. Мы ищем свободного курьера." },
-            NO_COURIER_AVAILABLE: { title: "Нет свободных курьеров", description: "Мы продолжаем поиск. Сообщим, как только машина выедет." },
-            TRAFFIC_DELAY: { title: "Задержка из-за пробок", description: "Курьер стоит в пробке. Время доставки немного сдвигается." },
-            WEATHER_DELAY: { title: "Погодные условия", description: "Из-за погоды доставка может занять больше времени. Мы стараемся успеть." },
+            [DeliveryReasonCode.COURIER_OVERLOAD]: { title: "Высокая нагрузка на курьеров", description: "Сейчас много заказов. Мы ищем свободного курьера." },
+            [DeliveryReasonCode.NO_COURIER_AVAILABLE]: { title: "Нет свободных курьеров", description: "Мы продолжаем поиск. Сообщим, как только машина выедет." },
+            [DeliveryReasonCode.TRAFFIC_DELAY]: { title: "Задержка из-за пробок", description: "Курьер стоит в пробке. Время доставки немного сдвигается." },
+            [DeliveryReasonCode.WEATHER_DELAY]: { title: "Погодные условия", description: "Из-за погоды доставка может занять больше времени. Мы стараемся успеть." },
 
-            OUT_OF_STOCK: { title: "Товара нет в наличии", description: "Некоторые позиции закончились. Выберите замену или частичную доставку." },
-            PARTIAL_STOCK: { title: "Частичная готовность", description: "Часть заказа готова. Мы можем доставить её сейчас, а остальное позже." },
+            [DeliveryReasonCode.OUT_OF_STOCK]: { title: "Товара нет в наличии", description: "Некоторые позиции закончились. Выберите замену или частичную доставку." },
+            [DeliveryReasonCode.PARTIAL_STOCK]: { title: "Частичная готовность", description: "Часть заказа готова. Мы можем доставить её сейчас, а остальное позже." },
 
-            WAREHOUSE_DELAY: { title: "Задержка на складе", description: "Сборка занимает больше времени, чем обычно. Работаем над этим." },
-            PICKING_DELAY: { title: "Задержка комплектации", description: "Сотрудники склада перегружены. Ваш заказ скоро будет собран." },
-            STORE_CONFIRMATION_DELAY: { title: "Ждём ответ магазина", description: "Магазин долго не подтверждает заказ. Мы выясняем причину." },
+            [DeliveryReasonCode.WAREHOUSE_DELAY]: { title: "Задержка на складе", description: "Сборка занимает больше времени, чем обычно. Работаем над этим." },
+            [DeliveryReasonCode.PICKING_DELAY]: { title: "Задержка комплектации", description: "Сотрудники склада перегружены. Ваш заказ скоро будет собран." },
+            [DeliveryReasonCode.STORE_CONFIRMATION_DELAY]: { title: "Ждём ответ магазина", description: "Магазин долго не подтверждает заказ. Мы выясняем причину." },
 
-            ADDRESS_CLARIFICATION_REQUIRED: { title: "Уточните адрес", description: "Курьер не может найти дом/вход. Пожалуйста, проверьте данные." },
-            PHONE_UNREACHABLE: { title: "Не дозвониться", description: "Курьер звонил, но никто не ответил. Пожалуйста, перезвоните или проверьте номер." },
+            [DeliveryReasonCode.ADDRESS_CLARIFICATION_REQUIRED]: { title: "Уточните адрес", description: "Курьер не может найти дом/вход. Пожалуйста, проверьте данные." },
+            [DeliveryReasonCode.PHONE_UNREACHABLE]: { title: "Не дозвониться", description: "Курьер звонил, но никто не ответил. Пожалуйста, перезвоните или проверьте номер." },
 
-            CUSTOMER_REQUESTED_RESCHEDULE: { title: "Доставка перенесена", description: "Время доставки изменено по вашему запросу." },
-            CUSTOMER_CANCELLED: { title: "Заказ отменён", description: "Вы отменили этот заказ." },
+            [DeliveryReasonCode.CUSTOMER_REQUESTED_RESCHEDULE]: { title: "Доставка перенесена", description: "Время доставки изменено по вашему запросу." },
+            [DeliveryReasonCode.CUSTOMER_CANCELLED]: { title: "Заказ отменён", description: "Вы отменили этот заказ." },
 
-            PROVIDER_ERROR: { title: "Ошибка системы доставки", description: "Не удалось обновить статус. Система попробует снова автоматически." },
-            PAYMENT_ISSUE: { title: "Ошибка оплаты", description: "Платёж не прошёл. Попробуйте оплатить снова." },
-            UNKNOWN: { title: "Проверяем статус", description: "Мы уточняем информацию по заказу и скоро обновим данные." },
+            [DeliveryReasonCode.PROVIDER_ERROR]: { title: "Ошибка системы доставки", description: "Не удалось обновить статус. Система попробует снова автоматически." },
+            [DeliveryReasonCode.PAYMENT_ISSUE]: { title: "Ошибка оплаты", description: "Платёж не прошёл. Попробуйте оплатить снова." },
+            [DeliveryReasonCode.UNKNOWN]: { title: "Проверяем статус", description: "Мы уточняем информацию по заказу и скоро обновим данные." },
 
             cta: {
                 fix_address: "Исправить адрес",

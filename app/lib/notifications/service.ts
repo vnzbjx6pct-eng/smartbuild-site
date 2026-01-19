@@ -1,11 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
-import type { DeliveryReasonCode} from "../delivery/reasonCodes";
+import type { DeliveryReasonCode } from "../delivery/reasonCodes";
 import { REASON_SEVERITY, DeliverySeverity } from "../delivery/reasonCodes";
 
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// initialization moved inside function
+
 
 interface NotifyParams {
     userId: string;
@@ -32,12 +30,20 @@ function getSeverityFromParams(params: NotifyParams): DeliverySeverity {
 }
 
 export async function notifyOnShipmentChange(params: NotifyParams) {
-    const { userId, orderId, shipmentId, newStatus, eventType, reasonCode } = params;
+    const { userId, orderId, shipmentId, newStatus, eventType } = params;
+
+    const sbUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const sbKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!sbUrl || !sbKey) {
+        console.error("Missing Supabase config for notifications");
+        return;
+    }
+    const supabase = createClient(sbUrl, sbKey);
 
     // --- 1. FILTERING (MVP Rules) ---
     const severity = getSeverityFromParams(params);
     let shouldNotify = false;
-    let notificationType = eventType as string; // Normalized type for DB
+    let notificationType: string = eventType; // Normalized type for DB
 
     // Rule 1: ORDER_SUBMITTED (Triggered explicitly or via status?)
     // If passed as 'order_submitted'
@@ -158,7 +164,7 @@ export async function notifyOnShipmentChange(params: NotifyParams) {
         .from('notifications')
         .insert({
             user_id: userId,
-            type: notificationType as any,
+            type: notificationType,
             severity,
             title_key: titleKey,
             body_key: bodyKey,
@@ -183,8 +189,8 @@ export async function notifyOnShipmentChange(params: NotifyParams) {
                 method: 'POST',
                 body: JSON.stringify({ notificationId: notif.id, locale: userLocale }),
                 headers: { 'Content-Type': 'application/json' }
-            }).catch(e => console.error("Email trigger warning", e));
-        } catch (e) { /* ignore */ }
+            }).catch((_e: unknown) => console.error("Email trigger warning", _e));
+        } catch { /* ignore */ }
     }
 
     // Log events

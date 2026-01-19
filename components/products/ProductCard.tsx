@@ -63,11 +63,14 @@ export default function ProductCard({ product }: { product: Product }) {
                 </div>
 
                 <div className="aspect-[4/3] relative bg-slate-900 rounded-xl mb-4 overflow-hidden border border-slate-700/50">
-                    <img
+                    <Image
                         src={imgSrc}
                         alt={displayName}
                         onError={() => setImgSrc("/images/products/placeholder.png")}
-                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90 group-hover:opacity-100"
+                        className="object-cover group-hover:scale-105 transition-transform duration-500 opacity-90 group-hover:opacity-100"
+                        fill
+                        placeholder="empty"
+                        unoptimized={true} // Allow external images (unsplash, etc)
                     />
                     {/* Gradient Overlay for Text Readability if needed, though we have cards below */}
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent pointer-events-none" />

@@ -1,12 +1,18 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { Bell, Check, ChevronRight } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Bell } from "lucide-react";
 import { supabase } from "@/app/lib/supabaseClient";
 import type { Notification } from "@/app/lib/types";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+
+interface NotificationDict {
+    title: Record<string, string>;
+    body: Record<string, string>;
+    empty?: string;
+}
 
 export default function NotificationBell() {
     const { t } = useLanguage();
@@ -15,31 +21,30 @@ export default function NotificationBell() {
     const [unreadCount, setUnreadCount] = useState(0);
     const [isOpen, setIsOpen] = useState(false);
 
-    const fetchNotifications = useCallback(async () => {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-
-        const { data } = await supabase
-            .from('notifications')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false })
-            .limit(10);
-
-        if (data) {
-            setNotifications(data as any);
-            setUnreadCount(data.filter((n: any) => !n.is_read).length);
-        }
-    }, []);
-
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        const fetchNotifications = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            const { data } = await supabase
+                .from('notifications')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false })
+                .limit(10);
+
+            if (data) {
+                const notifications = data as unknown as Notification[];
+                setNotifications(notifications);
+                setUnreadCount(notifications.filter((n) => !n.is_read).length);
+            }
+        };
+
         fetchNotifications();
 
-        // Optional: Realtime subscription could go here
-        const interval = setInterval(fetchNotifications, 60000); // Poll every minute
+        const interval = setInterval(fetchNotifications, 60000);
         return () => clearInterval(interval);
-    }, [fetchNotifications]);
+    }, []);
 
     const handleRead = async (n: Notification) => {
         if (!n.is_read) {
@@ -55,33 +60,43 @@ export default function NotificationBell() {
     };
 
     const getLocalizedText = (n: Notification) => {
-        const dict = (t as any).notifications || {};
-        const title = n.title_key ? titleFallback(n.title_key, dict) : n.title_text || "";
-        const body = n.body_key ? bodyFallback(n.body_key, dict, n.payload) : n.body_text || "";
+        // Safe casting for dictionary access
+        const dict = (t as unknown as Record<string, unknown>).notifications as NotificationDict | undefined;
+        const safeDict = dict || { title: {}, body: {} };
+
+        const title = n.title_key ? titleFallback(n.title_key, safeDict) : n.title_text || "";
+        const body = n.body_key ? bodyFallback(n.body_key, safeDict, n.payload) : n.body_text || "";
         return { title, body };
     };
 
     // Helper to resolve nested keys "notifications.title.dispatched"
-    const titleFallback = (key: string, dict: any) => {
+    const titleFallback = (key: string, dict: NotificationDict) => {
         const parts = key.split('.');
         if (parts.length === 3 && parts[0] === 'notifications') {
-            return dict[parts[1]]?.[parts[2]] || key;
+            const section = parts[1] as keyof NotificationDict;
+            if (section === 'title' || section === 'body') {
+                const subDict = dict[section];
+                return subDict?.[parts[2]] || key;
+            }
         }
         return key;
     };
 
-    const bodyFallback = (key: string, dict: any, payload: any) => {
+    const bodyFallback = (key: string, dict: NotificationDict, payload: unknown) => {
         let text = titleFallback(key, dict); // Reuse logic
         // Simple template replacement
-        if (payload) {
+        if (payload && typeof payload === 'object') {
             // e.g. {eta_range}
-            // payload might trigger other lookups, simplifed for now
             Object.keys(payload).forEach(k => {
-                text = text.replace(`{${k}}`, payload[k]);
+                const val = (payload as Record<string, string>)[k];
+                text = text.replace(`{${k}}`, val);
             });
         }
         return text;
     };
+
+    // Access empty state safely
+    const emptyText = ((t as unknown as Record<string, unknown>).notifications as NotificationDict | undefined)?.empty || "No notifications";
 
     return (
         <div className="relative">
@@ -110,7 +125,7 @@ export default function NotificationBell() {
                         <div className="max-h-[400px] overflow-y-auto">
                             {notifications.length === 0 ? (
                                 <div className="p-8 text-center text-slate-400 text-sm">
-                                    {(t as any).notifications?.empty || "No notifications"}
+                                    {emptyText}
                                 </div>
                             ) : (
                                 notifications.map(n => {

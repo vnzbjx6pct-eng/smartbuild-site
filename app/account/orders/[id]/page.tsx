@@ -53,10 +53,11 @@ export default function OrderDetailsPage() {
     const params = useParams();
     const id = params?.id as string;
     const { t } = useLanguage();
+    const dict = t as unknown as Record<string, any>;
 
     const [order, setOrder] = useState<Order | null>(null);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<string>("today"); // 'today' | 'later'
+    // const [activeTab, setActiveTab] = useState<string>("today"); // Unused
 
     // --- DATA FETCHING ---
     useEffect(() => {
@@ -75,7 +76,7 @@ export default function OrderDetailsPage() {
                 .eq("user_id", user.id)
                 .single();
 
-            if (data) setOrder(data as any);
+            if (data) setOrder(data as unknown as Order);
             setLoading(false);
         };
         fetchOrder();
@@ -85,15 +86,9 @@ export default function OrderDetailsPage() {
     const model: OrderViewModel | null = useMemo(() => {
         if (!order) return null;
 
-        const dict = (t as any).order_details;
-        const dictReasons = (t as any).delivery?.reasons || {};
-        const dictAcc = (t as any).account;
-
-        // 1. Status Logic
-        // Simple logic: if any shipment is 'dispatched', global is 'in_progress'. 
-        // If all 'delivered', global 'completed'.
-        // If any 'delayed' (mock logic), global 'problem'.
-
+        const dOrder = dict.order_details;
+        const dictReasons = dict.delivery?.reasons || {};
+        const dictAcc = dict.account;
 
         let globalStatus: "in_progress" | "completed" | "problem" = "in_progress";
         const hasShipments = (order.shipments?.length ?? 0) > 0;
@@ -104,13 +99,12 @@ export default function OrderDetailsPage() {
         if (anyProblem) globalStatus = "problem";
 
         const statusMap = {
-            in_progress: { text: dict.status_in_progress, color: "blue" as const, icon: Truck, description: "Kuller on teel" },
-            completed: { text: dict.status_completed, color: "green" as const, icon: CheckCircle2, description: "Kõik kaubad kohal" },
-            problem: { text: dict.status_problem, color: "red" as const, icon: AlertCircle, description: dict.reason_high_demand },
+            in_progress: { text: dOrder.status_in_progress, color: "blue" as const, icon: Truck, description: "Kuller on teel" },
+            completed: { text: dOrder.status_completed, color: "green" as const, icon: CheckCircle2, description: "Kõik kaubad kohal" },
+            problem: { text: dOrder.status_problem, color: "red" as const, icon: AlertCircle, description: dOrder.reason_high_demand },
         };
 
         // 2. ETA Logic
-        // Find latest ETA from shipments
         const etas = order.shipments?.map(s => s.eta_minutes ? new Date(new Date(s.created_at).getTime() + s.eta_minutes * 60000) : null).filter(Boolean) || [];
         const latestEta = etas.length > 0 ? new Date(Math.max(...etas.map(d => d!.getTime()))) : null;
 
@@ -119,23 +113,21 @@ export default function OrderDetailsPage() {
             const isToday = latestEta.toDateString() === new Date().toDateString();
             const timeStr = latestEta.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             etaDisplay = {
-                label: dict.eta_title,
-                value: `${isToday ? dict.eta_today : dict.eta_tomorrow}, ${timeStr}`,
+                label: dOrder.eta_title,
+                value: `${isToday ? dOrder.eta_today : dOrder.eta_tomorrow}, ${timeStr}`,
                 isDelayed: globalStatus === 'problem'
             };
         }
 
         // 3. Timeline Logic
-        // Mock progress based on status
         const steps = [
-            { id: 'placed', label: dict.timeline_placed, icon: FileText, completed: true },
-            { id: 'confirmed', label: dict.timeline_confirmed, icon: CheckCircle2, completed: order.status !== 'draft' },
-            { id: 'assembly', label: dict.timeline_assembly, icon: Package, completed: order.status !== 'draft' && order.status !== 'submitted' },
-            { id: 'shipping', label: dict.timeline_shipping, icon: Truck, completed: order.shipments?.some(s => ['dispatched', 'delivered'].includes(s.status)) ?? false },
-            { id: 'delivered', label: dict.timeline_delivered, icon: Star, completed: allDelivered }
+            { id: 'placed', label: dOrder.timeline_placed, icon: FileText, completed: true },
+            { id: 'confirmed', label: dOrder.timeline_confirmed, icon: CheckCircle2, completed: order.status !== 'draft' },
+            { id: 'assembly', label: dOrder.timeline_assembly, icon: Package, completed: order.status !== 'draft' && order.status !== 'submitted' },
+            { id: 'shipping', label: dOrder.timeline_shipping, icon: Truck, completed: order.shipments?.some(s => ['dispatched', 'delivered'].includes(s.status)) ?? false },
+            { id: 'delivered', label: dOrder.timeline_delivered, icon: Star, completed: allDelivered }
         ];
 
-        // Mark current
         let foundCurrent = false;
         const timeline = steps.map(s => {
             const isCurrent = !s.completed && !foundCurrent;
@@ -143,18 +135,13 @@ export default function OrderDetailsPage() {
             return { ...s, current: isCurrent || (s.id === 'delivered' && s.completed) };
         });
 
-        // 4. Grouping Items (Partial Delivery Support)
-        // Group by shipment type or date. For now, group by "Shipment X" if multiple, or just "Items"
+        // 4. Grouping Items
         const groups = [];
         if (order.shipments && order.shipments.length > 0) {
-            order.shipments.forEach((s, idx) => {
-                // Enrich events with reason texts
+            order.shipments.forEach((s) => {
                 if (s.events) {
                     s.events = s.events.map(ev => {
-                        // Filter internal events (though RLS should handle, good to be safe)
                         if (ev.visibility === 'internal') return null;
-
-                        // Generate message if missing
                         let msg = ev.message;
                         if (ev.reason_code && dictReasons[ev.reason_code]) {
                             msg = dictReasons[ev.reason_code].title;
@@ -173,7 +160,7 @@ export default function OrderDetailsPage() {
             });
         } else {
             groups.push({
-                title: dict.tab_today, // Fallback
+                title: dOrder.tab_today, // Fallback
                 items: order.items || []
             });
         }
@@ -189,13 +176,13 @@ export default function OrderDetailsPage() {
             delivery: {
                 address: `${order.address_line}, ${order.city}`,
                 contact: order.phone,
-                method: order.shipments?.[0]?.type === 'pickup' ? dictAcc.type_pickup : dictAcc.type_wolt // Simplified
+                method: order.shipments?.[0]?.type === 'pickup' ? dictAcc.type_pickup : dictAcc.type_wolt
             }
         };
 
-    }, [order, t]);
+    }, [order, dict, dict.order_details, dict.delivery, dict.account]);
 
-    if (loading) return <div></div>; // Handled by loading.tsx? No, client side needs spinner
+    if (loading) return <div></div>;
     if (!order || !model) return <div className="p-8 text-center text-slate-500">Order not found</div>;
 
     const StatusIcon = model.humanStatus.icon;
@@ -205,7 +192,7 @@ export default function OrderDetailsPage() {
             {/* Nav */}
             <Link href="/account/orders" className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-800 mb-6 font-medium text-sm transition-colors">
                 <ArrowLeft size={16} />
-                {(t as any).account.back_to_orders}
+                {dict.account.back_to_orders}
             </Link>
 
             {/* 1. Header Card */}
@@ -255,15 +242,15 @@ export default function OrderDetailsPage() {
 
                             <div className="flex-1">
                                 <div className="font-bold text-lg mb-1">
-                                    {(t as any).delivery.ux[model.uxState.reasonCode].title}
+                                    {dict.delivery.ux[model.uxState.reasonCode].title}
                                 </div>
                                 <div className="text-white/80 text-sm mb-3">
-                                    {(t as any).delivery.ux[model.uxState.reasonCode].description}
+                                    {dict.delivery.ux[model.uxState.reasonCode].description}
                                 </div>
 
                                 {model.uxState.action !== DeliveryAction.NONE && (
                                     <button className="bg-white text-slate-900 font-bold py-2 px-4 rounded-xl text-sm hover:bg-slate-100 transition-colors">
-                                        {(t as any).delivery.ux.cta[model.uxState.action]}
+                                        {dict.delivery.ux.cta[model.uxState.action]}
                                     </button>
                                 )}
                             </div>
@@ -315,7 +302,7 @@ export default function OrderDetailsPage() {
 
             {/* 3. Order Content (Groups) */}
             <div className="space-y-6 mb-10">
-                <h3 className="text-xl font-bold text-slate-900 px-2">{(t as any).order_details.items_count.replace('{count}', order.items?.reduce((acc, i: any) => acc + i.qty, 0) || 0)}</h3>
+                <h3 className="text-xl font-bold text-slate-900 px-2">{dict.order_details.items_count.replace('{count}', order.items?.reduce((acc, i) => acc + (i.qty || 0), 0) || 0)}</h3>
 
                 {model.groups.map((group, idx) => (
                     <div key={idx} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -339,7 +326,7 @@ export default function OrderDetailsPage() {
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="font-bold text-slate-900 truncate">{item.name}</div>
-                                        <div className="text-sm text-slate-500">{item.qty} {(t as any).common.pcs} × {item.price.toFixed(2)} €</div>
+                                        <div className="text-sm text-slate-500">{item.qty} {dict.common.pcs} × {item.price.toFixed(2)} €</div>
                                     </div>
                                     <div className="text-right font-bold text-slate-900">
                                         {item.line_total.toFixed(2)} €
@@ -356,7 +343,7 @@ export default function OrderDetailsPage() {
                 <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                     <h4 className="font-bold text-slate-900 flex items-center gap-2 text-sm uppercase tracking-wide text-slate-500">
                         <MapPin size={16} />
-                        {(t as any).order_details.shipping_address}
+                        {dict.order_details.shipping_address}
                     </h4>
                     <div className="text-lg font-medium text-slate-900">{model.delivery.address}</div>
                     <div className="bg-slate-50 p-3 rounded-xl flex items-center gap-3 text-sm text-slate-600">
@@ -364,7 +351,7 @@ export default function OrderDetailsPage() {
                             {model.delivery.contact.slice((model.delivery.contact.length || 2) - 2)}
                         </div>
                         <div>
-                            <div className="font-bold text-slate-900">{(t as any).order_details.contact_receiver}</div>
+                            <div className="font-bold text-slate-900">{dict.order_details.contact_receiver}</div>
                             {model.delivery.contact}
                         </div>
                     </div>
@@ -373,7 +360,7 @@ export default function OrderDetailsPage() {
                 <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                     <h4 className="font-bold text-slate-900 flex items-center gap-2 text-sm uppercase tracking-wide text-slate-500">
                         <Info size={16} />
-                        {(t as any).order_details.shipping_method}
+                        {dict.order_details.shipping_method}
                     </h4>
                     <div className="text-lg font-medium text-slate-900 flex items-center gap-2">
                         {model.delivery.method}
@@ -396,12 +383,12 @@ export default function OrderDetailsPage() {
                         <HelpCircle size={24} />
                     </div>
                     <div className="flex-1">
-                        <h4 className="font-bold text-indigo-900 text-lg mb-1">{(t as any).order_details.help_title}</h4>
-                        <p className="text-indigo-700/80 text-sm">{(t as any).order_details.help_desc}</p>
+                        <h4 className="font-bold text-indigo-900 text-lg mb-1">{dict.order_details.help_title}</h4>
+                        <p className="text-indigo-700/80 text-sm">{dict.order_details.help_desc}</p>
                     </div>
                     <div className="flex flex-col gap-2 w-full md:w-auto">
                         <button className="bg-white hover:bg-indigo-100 text-indigo-600 font-semibold py-2 px-4 rounded-xl border border-indigo-200 transition-colors text-sm">
-                            {(t as any).order_details.action_faq}
+                            {dict.order_details.action_faq}
                         </button>
                     </div>
                 </div>
@@ -410,11 +397,11 @@ export default function OrderDetailsPage() {
                 <div className="grid grid-cols-2 gap-4">
                     <button className="flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-slate-600 font-bold py-4 rounded-xl border border-slate-200 transition-colors shadow-sm">
                         <Repeat size={18} />
-                        {(t as any).order_details.action_repeat}
+                        {dict.order_details.action_repeat}
                     </button>
                     <button className="flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl transition-colors shadow-lg shadow-slate-900/10">
                         <Star size={18} />
-                        {(t as any).order_details.action_rate}
+                        {dict.order_details.action_rate}
                     </button>
                 </div>
             </div>

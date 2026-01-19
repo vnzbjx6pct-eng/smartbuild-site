@@ -1,40 +1,80 @@
 'use server'
 
-import { createClient } from "@supabase/supabase-js";
-
-// Initialize admin client for server actions (or use standard server client pattern)
-// Using process.env directly for now as per project context if available, 
-// or falling back to the existing supabaseServer if it exports what we need.
-// But usually for Server Actions we prefer creating a client with cookies or direct env if service role.
-// Since we don't have cookies easily here without `next/headers`, and I saw `app/lib/supabaseServer.ts` previously.
-// Let's check `app/lib/supabaseServer.ts` usage pattern. 
-// Step 283 used `import { supabase } from "@/app/lib/supabaseServer";` in a route handler.
-// So I will use that.
-
 import { supabase } from "@/app/lib/supabaseServer";
+import type { PartnerProductDraft } from "@/app/lib/partner/csv";
 
-export async function savePartnerProducts(products: any[], storeId: string) {
+// Helper to get or create a store for the user
+async function getOrCreateStore(userId: string) {
+    // 1. Try to find existing store
+    const { data: store } = await supabase
+        .from('partner_stores')
+        .select('id, name')
+        .eq('owner_id', userId)
+        .single();
+
+    if (store) return { store, error: null };
+
+    // 2. If not found (and no error other than not found), create one
+    const { data: newStore, error: createError } = await supabase
+        .from('partner_stores')
+        .insert({ owner_id: userId, name: 'My Store' })
+        .select('id, name')
+        .single();
+
+    return { store: newStore, error: createError };
+}
+
+export async function savePartnerProducts(products: PartnerProductDraft[]) {
     if (!products || products.length === 0) return { success: true, count: 0 };
-    if (!storeId) return { success: false, error: "Missing store ID" };
 
-    // Format for DB
+    // 1. Auth check using secure cookie-based client
+    const { cookies } = await import("next/headers");
+    const { createServerComponentClient } = await import("@supabase/auth-helpers-nextjs");
+    const cookieStore = cookies();
+    const supabaseAuth = createServerComponentClient({ cookies: () => cookieStore });
+
+    const { data: { session } } = await supabaseAuth.auth.getSession();
+    if (!session?.user) {
+        return { success: false, error: "Unauthorized" };
+    }
+    const userId = session.user.id;
+
+    // 2. Get/Create Store
+    const { store, error: storeError } = await getOrCreateStore(userId);
+    if (storeError || !store) {
+        console.error("Store creation error:", storeError);
+        return { success: false, error: "Count not find or create store." };
+    }
+
+    // 3. Format rows
     const rows = products.map(p => ({
-        store_id: storeId,
-        product_name: p.product_name || p.name || 'Unknown',
+        store_id: store.id,
+        product_name: p.product_name,
         category: p.category,
-        price: parseFloat(p.price) || 0,
-        unit: p.unit,
-        availability: p.availability || 'In Stock',
+        subcategory: p.subcategory,
+        price: p.price,
+        stock: p.stock,
+        unit: 'pcs', // Default
+        availability: p.stock > 0 ? 'In Stock' : 'Out of Stock',
+
+        // Detailed fields
+        description: p.description,
+        sku: p.sku,
+        ean: p.ean,
+        delivery_days: p.delivery_days,
 
         // Categorization fields
         normalized_category: p.auto_category,
         normalized_subcategory: p.auto_subcategory,
         categorization_confidence: p.confidence ? parseFloat(p.confidence.replace('%', '')) / 100 : null,
 
-        // Validation/Status
-        status: 'draft'
+        // Save original row for debugging if needed (optional)
+        // source_csv_row: p, 
+
+        status: 'active'
     }));
 
+    // 4. Insert
     try {
         const { error } = await supabase
             .from('partner_products')
@@ -46,8 +86,46 @@ export async function savePartnerProducts(products: any[], storeId: string) {
         }
 
         return { success: true, count: rows.length };
-    } catch (e) {
+    } catch (e: unknown) {
         console.error("Server Action Error:", e);
         return { success: false, error: "Internal Server Error" };
     }
+}
+
+export async function getPartnerProducts() {
+    const { cookies } = await import("next/headers");
+    const { createServerComponentClient } = await import("@supabase/auth-helpers-nextjs");
+    const cookieStore = cookies();
+    const supabaseAuth = createServerComponentClient({ cookies: () => cookieStore });
+
+    const { data: { session } } = await supabaseAuth.auth.getSession();
+    if (!session?.user) {
+        return { success: false, error: "Unauthorized" };
+    }
+    const userId = session.user.id;
+
+    // Get Store
+    const { data: store } = await supabase
+        .from('partner_stores')
+        .select('id')
+        .eq('owner_id', userId)
+        .single();
+
+    if (!store) {
+        return { success: true, data: [] };
+    }
+
+    // Fetch Products
+    const { data, error } = await supabase
+        .from('partner_products')
+        .select('*')
+        .eq('store_id', store.id)
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        console.error("Fetch Error:", error);
+        return { success: false, error: error.message };
+    }
+
+    return { success: true, data };
 }

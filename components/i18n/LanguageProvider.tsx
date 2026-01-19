@@ -25,8 +25,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         const saved = localStorage.getItem("sb_lang") as Language;
         if (saved === "et" || saved === "ru") {
-            // eslint-disable-next-line react-hooks/exhaustive-deps
-            setLanguageState(saved);
+
+            setTimeout(() => setLanguageState(saved), 0);
         }
     }, []);
 

@@ -50,3 +50,11 @@ const model = {
 ### 3. CI Pipeline
 GitHub Actions will run `npm run check` (Lint + Typecheck) + `npm run build` on every PR.
 Vercel deployments will fail if this check fails.
+
+## Troubleshooting
+
+### Dev Server Locked (".next/dev/lock")
+If you see `Unable to acquire lock at .next/dev/lock` or `Port 3000 is in use`:
+1. Stop the running server.
+2. Run: `lsof -i :3000` (shows PID) -> `kill -9 <PID>`
+3. Run: `rm -f .next/dev/lock`

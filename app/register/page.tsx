@@ -33,17 +33,19 @@ export default function RegisterPage() {
 
             alert('Andmed salvestatud! Teid tuvastatakse nüüd automaatselt.');
             router.push('/'); // Redirect to home or logic
-        } catch (err: any) {
-            setError('Viga salvestamisel: ' + err.message);
+        } catch (err: unknown) {
+            setError('Viga salvestamisel: ' + (err instanceof Error ? err.message : String(err)));
         } finally {
             setLoading(false);
         }
     };
 
+    const authDict = (t as unknown as Record<string, any>).auth || {};
+
     return (
         <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-slate-50 px-4">
             <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 w-full max-w-md">
-                <h1 className="text-2xl font-bold text-center mb-6 text-slate-900">{(t as any).auth?.register || "Seadista profiil"}</h1>
+                <h1 className="text-2xl font-bold text-center mb-6 text-slate-900">{authDict.register || "Seadista profiil"}</h1>
 
                 {/* Social Login Buttons */}
                 <div className="space-y-3 mb-6">
@@ -58,7 +60,7 @@ export default function RegisterPage() {
                             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.26.81-.58z" fill="#FBBC05" />
                             <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                         </svg>
-                        {(t as any).auth?.continue_with_google || "Jätka Google’iga"}
+                        {authDict.continue_with_google || "Jätka Google’iga"}
                     </button>
                     {/* Facebook and Apple skipped for brevity in Register to avoid overwhelming wall of text, or should I add them? 
                         USER asked for consistency. Let's add them.
@@ -71,7 +73,7 @@ export default function RegisterPage() {
                         <svg className="w-5 h-5 text-[#1877F2]" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.581c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036c-2.148 0-2.797 1.603-2.797 4.16v1.922h5.083l-1.109 3.667h-3.974v7.98h-5.026z" />
                         </svg>
-                        {(t as any).auth?.continue_with_facebook || "Jätka Facebook’iga"}
+                        {authDict.continue_with_facebook || "Jätka Facebook’iga"}
                     </button>
                     <button
                         onClick={() => signInWithOAuth('apple')}
@@ -81,7 +83,7 @@ export default function RegisterPage() {
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.027-3.04 2.48-4.508 2.597-4.598-1.429-2.09-3.623-2.324-4.403-2.363-2-.08-3.675 1.04-4.61 1.04zm4.961-4.47c.546 1.052.701 2.325.701 3.597 1.182.027 2.455-.494 3.013-1.48.559-1.027.676-2.287.676-3.443-1.324.013-2.52.545-3.091 1.325z" />
                         </svg>
-                        {(t as any).auth?.continue_with_apple || "Jätka Apple’iga"}
+                        {authDict.continue_with_apple || "Jätka Apple’iga"}
                     </button>
                 </div>
 
@@ -91,7 +93,7 @@ export default function RegisterPage() {
                     </div>
                     <div className="relative flex justify-center text-sm">
                         <span className="px-2 bg-white text-slate-500">
-                            {(t as any).auth?.or_email || "või e-postiga"}
+                            {authDict.or_email || "või e-postiga"}
                         </span>
                     </div>
                 </div>

@@ -19,6 +19,7 @@ interface Props {
 export default function WoltSmartTip({ suggestion, items, onApply, onUndo, city }: Props) {
     const { t } = useLanguage();
     const itemName = suggestion.itemName;
+    const woltDict = ((t as unknown as Record<string, unknown>).wolt || {}) as Record<string, string>;
 
     // Local Logic for Preview
 
@@ -65,18 +66,18 @@ export default function WoltSmartTip({ suggestion, items, onApply, onUndo, city 
                 </div>
                 <div className="flex-1">
                     <h4 className="text-sm font-medium text-blue-200">
-                        {((t as any).wolt?.tip_inline_general || "Suggestion").replace("{name}", itemName)}
+                        {(woltDict.tip_inline_general || "Suggestion").replace("{name}", itemName)}
                     </h4>
                     <p className="text-xs text-blue-300/80 mt-0.5">
                         {isQtyReduction
-                            ? ((t as any).wolt?.tip_inline_reduce || "Reduce {name}").replace("{name}", itemName).replace("{from}", String(originalQty)).replace("{to}", String(previewQty))
-                            : ((t as any).wolt?.tip_inline_move || "Move {name}").replace("{name}", itemName)
+                            ? (woltDict.tip_inline_reduce || "Reduce {name}").replace("{name}", itemName).replace("{from}", String(originalQty)).replace("{to}", String(previewQty))
+                            : (woltDict.tip_inline_move || "Move {name}").replace("{name}", itemName)
                         }
                     </p>
                     {isEligible && (
                         <div className="flex items-center gap-1.5 mt-1 text-emerald-400 text-xs font-medium">
                             <Check size={12} />
-                            {(t as any).wolt?.tip_inline_success}
+                            {woltDict.tip_inline_success}
                         </div>
                     )}
                 </div>
@@ -84,7 +85,7 @@ export default function WoltSmartTip({ suggestion, items, onApply, onUndo, city 
                     onClick={handleApply}
                     className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg transition-colors"
                 >
-                    {(t as any).wolt?.action_inline_apply}
+                    {woltDict.action_inline_apply}
                 </button>
             </div>
 

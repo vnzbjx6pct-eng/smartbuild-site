@@ -11,18 +11,16 @@ export default function GlobalError({
     error: Error & { digest?: string };
     reset: () => void;
 }) {
-    const [errorId, setErrorId] = useState<string>("");
+    const [errorId] = useState<string>(() => {
+        return `ERR-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+    });
 
     useEffect(() => {
-        // Generate a short error ID for support
-        const id = `ERR-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        setErrorId(id);
-        console.error(`[GlobalError] ${id}:`, error);
+        console.error(`[GlobalError] ${errorId}:`, error);
 
         // Optional: Send to logging service
         // fetch('/api/log-error', { ... })
-    }, [error]);
+    }, [error, errorId]);
 
     return (
         <html>

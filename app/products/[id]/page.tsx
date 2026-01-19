@@ -53,7 +53,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         '@type': 'Product',
         name: product.name,
         description: `Võrdle ${product.name} hindu.`,
-        offers: product.offers?.map((offer: any) => ({
+        offers: product.offers?.map((offer: { price: number; brands?: { name: string } }) => ({
             '@type': 'Offer',
             price: offer.price,
             priceCurrency: 'EUR',
@@ -74,8 +74,18 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     }
 
     // Sort offers by price (ascending)
-    const offers = product.offers?.sort((a: any, b: any) => a.price - b.price) || [];
+    const offers = product.offers?.sort((a: { price: number }, b: { price: number }) => a.price - b.price) || [];
     const bestPrice = offers.length > 0 ? offers[0].price : null;
 
-    return <ClientProductDetail product={product} bestPrice={bestPrice} offers={offers} />;
+    return (
+        <>
+            {jsonLd && (
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+                />
+            )}
+            <ClientProductDetail product={product} bestPrice={bestPrice} offers={offers} />
+        </>
+    );
 }

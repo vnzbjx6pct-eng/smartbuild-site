@@ -1,14 +1,9 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { useLanguage } from "@/components/i18n/LanguageProvider";
-import { supabase } from "@/app/lib/supabaseServer"; // Client-safe if using client component? No, this imports server client.
-// We need client-side supabase client component or createClientComponentClient
-// But for now let's use a standard fetch to API or just mock the data saving if we don't have the client setup handy.
-// Actually, 'app/lib/supabaseServer' is likely server-only.
-// Let's check `app/lib/supabaseClient.ts` if it exists, or use standard pattern.
-// Given strict instructions not to fail, I will implement the UI and CSV logic first, and mock the save or use a server action if possible.
-// Wait, I see `supabaseClient.ts` in file list earlier.
+import { useState, useEffect, useCallback } from "react";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { isPartner } from "@/app/lib/auth";
+import { useRouter } from "next/navigation";
 
 import {
     LayoutDashboard,
@@ -18,83 +13,166 @@ import {
     AlertCircle,
     CheckCircle2,
     Loader2,
-    Search
+    Search,
+    Lock,
+    Boxes
 } from "lucide-react";
 import Link from "next/link";
-import { categorizeProduct } from "@/app/lib/categorization";
-import { savePartnerProducts } from "@/app/actions/partner";
-// import Papa from "papaparse"; // Not installed? I'll use simple split for MVP.
+import { savePartnerProducts, getPartnerProducts } from "@/app/actions/partner";
+import { normalizeCsvRow, type PartnerProductDraft, type CsvRowError } from "@/app/lib/partner/csv";
+
+interface PartnerProduct {
+    id: string;
+    product_name: string;
+    category: string;
+    price: number;
+    stock: number;
+    status: string;
+}
 
 export default function PartnerDashboardPage() {
-    const { t } = useLanguage();
-    // Dictionary doesn't have partner dashboard keys yet, using hardcoded for MVP as per instructions (or I should update dictionary).
-    // User asked for "Production-ready", so better to use dictionary or clean English.
-    // I will use English/Estonian mix or just hardcoded for speed and then update dictionary if asked.
-    // Actually, good practice: Use English for Admin/Dashboard interface for now or generic keys.
+    const router = useRouter();
+    const supabase = createClientComponentClient();
 
+    const [authStatus, setAuthStatus] = useState<'loading' | 'authorized' | 'denied'>('loading');
+    const [dbProducts, setDbProducts] = useState<PartnerProduct[]>([]);
+    const [loadingProducts, setLoadingProducts] = useState(false);
+
+    // Fetch products - Hoisted
+    const loadProducts = useCallback(async () => {
+        try {
+            const result = await getPartnerProducts();
+            if (result.success && result.data) {
+                setDbProducts(result.data);
+            } else {
+                console.error("Failed to load products:", result.error);
+            }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setLoadingProducts(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        const checkAccess = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                router.push("/login?next=/account/partner");
+                return;
+            }
+
+            const authorized = await isPartner(session.user, supabase);
+            setAuthStatus(authorized ? 'authorized' : 'denied');
+        };
+        checkAccess();
+    }, [router, supabase]);
+
+    // Dashboard State
     const [activeTab, setActiveTab] = useState<'overview' | 'import' | 'products'>('import');
     const [file, setFile] = useState<File | null>(null);
-    const [preview, setPreview] = useState<any[]>([]);
-    const [allData, setAllData] = useState<any[]>([]);
+    const [preview, setPreview] = useState<PartnerProductDraft[]>([]);
+    const [allData, setAllData] = useState<PartnerProductDraft[]>([]);
     const [uploading, setUploading] = useState(false);
     const [uploadStatus, setUploadStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
-    // Simple CSV Parser
+    // Load on tab change
+    useEffect(() => {
+        if (activeTab === 'products' && authStatus === 'authorized') {
+            loadProducts();
+        }
+    }, [activeTab, authStatus, loadProducts]);
+
+    if (authStatus === 'loading') {
+        return (
+            <div className="min-h-screen bg-slate-50 pt-24 pb-12 flex items-center justify-center">
+                <Loader2 className="w-8 h-8 text-slate-400 animate-spin" />
+            </div>
+        );
+    }
+
+    if (authStatus === 'denied') {
+        return (
+            <div className="min-h-screen bg-slate-50 pt-24 pb-12 px-4">
+                <div className="max-w-md mx-auto bg-white rounded-2xl shadow-sm border border-slate-100 p-8 text-center">
+                    <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Lock className="text-red-500" size={32} />
+                    </div>
+                    <h1 className="text-2xl font-bold text-slate-900 mb-2">Access Denied</h1>
+                    <p className="text-slate-500 mb-8">
+                        You do not have the required Partner permissions to access this dashboard.
+                    </p>
+                    <div className="space-y-3">
+                        <Link
+                            href="/partners"
+                            className="block w-full px-6 py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-all"
+                        >
+                            Become a Partner
+                        </Link>
+                        <Link
+                            href="/account"
+                            className="block w-full px-6 py-3 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-all"
+                        >
+                            Back to My Account
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Strict CSV Parser
     const parseCSV = (text: string) => {
         const lines = text.split('\n');
         const headers = lines[0].split(',').map(h => h.trim());
-        const result = [];
+
+        const validRows: PartnerProductDraft[] = [];
 
         for (let i = 1; i < lines.length; i++) {
             if (!lines[i].trim()) continue;
-            const obj: any = {};
+
             const currentline = lines[i].split(',');
+            const rawObj: Record<string, string> = {};
 
             headers.forEach((header, index) => {
-                obj[header] = currentline[index]?.trim();
+                if (currentline[index] !== undefined) {
+                    rawObj[header] = currentline[index].trim();
+                }
             });
 
-            // Auto Categorization
-            const catResult = categorizeProduct({
-                name: obj['product_name'] || obj['name'] || '',
-                category: obj['category'] || '',
-                description: obj['description'] || ''
-            });
-
-            obj['auto_category'] = catResult.category;
-            obj['auto_subcategory'] = catResult.subcategory;
-            obj['confidence'] = Math.round(catResult.confidence * 100) + '%';
-
-            result.push(obj);
+            const { value } = normalizeCsvRow(rawObj, i);
+            if (value) {
+                validRows.push(value);
+            }
         }
-        return result;
+        return { validRows };
     };
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const f = e.target.files[0];
             setFile(f);
+            setUploadStatus('idle');
 
             const text = await f.text();
-            const data = parseCSV(text);
-            setAllData(data);
-            setPreview(data.slice(0, 5)); // Preview first 5
+            const { validRows } = parseCSV(text);
+
+            setAllData(validRows);
+            setPreview(validRows.slice(0, 5));
         }
     };
 
     const handleUpload = async () => {
         setUploading(true);
         try {
-            // Mock store ID for MVP - in real app would get from auth session
-            const storeId = '00000000-0000-0000-0000-000000000000';
-
-            const result = await savePartnerProducts(allData, storeId);
+            const result = await savePartnerProducts(allData);
 
             if (result.success) {
                 setUploadStatus('success');
                 setFile(null);
                 setPreview([]);
                 setAllData([]);
+                // Optionally reload products if we switch tabs or show count
             } else {
                 setUploadStatus('error');
                 console.error("Upload failed", result.error);
@@ -120,7 +198,7 @@ export default function PartnerDashboardPage() {
                                 </div>
                                 <div>
                                     <h2 className="font-bold text-slate-900">Partner Portal</h2>
-                                    <p className="text-xs text-slate-500">Bauhof Group AS</p>
+                                    <p className="text-xs text-slate-500">My Store</p>
                                 </div>
                             </div>
 
@@ -140,7 +218,10 @@ export default function PartnerDashboardPage() {
                                     <span className="font-medium">Import Products</span>
                                 </button>
                                 <button
-                                    onClick={() => setActiveTab('products')}
+                                    onClick={() => {
+                                        setActiveTab('products');
+                                        if (authStatus === 'authorized') setLoadingProducts(true);
+                                    }}
                                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === 'products' ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/10' : 'text-slate-600 hover:bg-slate-50'}`}
                                 >
                                     <ListFilter size={18} />
@@ -192,10 +273,10 @@ export default function PartnerDashboardPage() {
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {preview.map((row, i) => (
+                                                    {preview.map((row, i: number) => (
                                                         <tr key={i} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
-                                                            {Object.values(row).map((val: any, j) => (
-                                                                <td key={j} className="px-4 py-3 text-slate-700 whitespace-nowrap">{val}</td>
+                                                            {Object.values(row).map((val, j) => (
+                                                                <td key={j} className="px-4 py-3 text-slate-700 whitespace-nowrap">{String(val)}</td>
                                                             ))}
                                                         </tr>
                                                     ))}
@@ -229,7 +310,7 @@ export default function PartnerDashboardPage() {
                             <div className="space-y-6">
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <StatCard title="Total Products" value="1,248" icon={Boxes} color="bg-blue-50 text-blue-600" />
-                                    <StatCard title="Active Orders" value="12" icon={Truck} color="bg-orange-50 text-orange-600" />
+                                    <StatCard title="Active Orders" value="12" icon={Boxes} color="bg-orange-50 text-orange-600" />
                                     <StatCard title="Revenue (MTD)" value="€8,420" icon={ListFilter} color="bg-green-50 text-green-600" />
                                 </div>
                                 <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 text-center py-20">
@@ -251,9 +332,48 @@ export default function PartnerDashboardPage() {
                                         <input className="pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm" placeholder="Search..." />
                                     </div>
                                 </div>
-                                <div className="text-center py-12 text-slate-500">
-                                    Loading products... (Mocked)
-                                </div>
+                                {loadingProducts ? (
+                                    <div className="text-center py-12 text-slate-500">
+                                        <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" />
+                                        Loading products...
+                                    </div>
+                                ) : (
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-sm text-left">
+                                            <thead className="bg-slate-50 text-slate-600 font-medium border-b border-slate-200">
+                                                <tr>
+                                                    <th className="px-4 py-3">Product Name</th>
+                                                    <th className="px-4 py-3">Category</th>
+                                                    <th className="px-4 py-3">Price</th>
+                                                    <th className="px-4 py-3">Stock</th>
+                                                    <th className="px-4 py-3">Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {dbProducts.map((p) => (
+                                                    <tr key={p.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
+                                                        <td className="px-4 py-3 font-medium text-slate-900">{p.product_name}</td>
+                                                        <td className="px-4 py-3 text-slate-500">{p.category}</td>
+                                                        <td className="px-4 py-3 text-slate-900">€{p.price}</td>
+                                                        <td className="px-4 py-3 text-slate-500">{p.stock}</td>
+                                                        <td className="px-4 py-3">
+                                                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700">
+                                                                {p.status}
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                                {dbProducts.length === 0 && (
+                                                    <tr>
+                                                        <td colSpan={5} className="text-center py-8 text-slate-500">
+                                                            No products found. Import some using the Import tab.
+                                                        </td>
+                                                    </tr>
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
                             </div>
                         )}
 
@@ -264,7 +384,14 @@ export default function PartnerDashboardPage() {
     );
 }
 
-function StatCard({ title, value, icon: Icon, color }: any) {
+interface StatCardProps {
+    title: string;
+    value: string;
+    icon: React.ElementType;
+    color: string;
+}
+
+function StatCard({ title, value, icon: Icon, color }: StatCardProps) {
     return (
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
             <div className={`w-12 h-12 rounded-xl ${color} flex items-center justify-center shrink-0`}>
@@ -277,5 +404,3 @@ function StatCard({ title, value, icon: Icon, color }: any) {
         </div>
     );
 }
-
-import { Boxes, Truck } from "lucide-react";
