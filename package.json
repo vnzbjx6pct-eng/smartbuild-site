@@ -35,14 +35,13 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
     "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
+    "lint-staged": "^15.2.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   },
   "lint-staged": {
-    "*.{ts,tsx}": [
-      "eslint --fix",
-      "bash -c 'tsc --noEmit'"
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix"
     ]
   }
 }

@@ -1,4 +1,12 @@
-# Contributing to SmartBuild
+# Contributing
+
+## GitHub Actions & PAT
+> [!NOTE]
+> If you need to enable the CI workflow, rename `.github/workflows/ci.yml.example` to `.github/workflows/ci.yml`.
+> You must have a Personal Access Token (PAT) with `workflow` scope to push changes to workflow files.
+> If you don't have this, please do not commit the workflow file.
+
+## Quality GatesSmartBuild
 
 ## Zero Build Surprises Policy
 
