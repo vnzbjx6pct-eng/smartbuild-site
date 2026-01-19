@@ -6,9 +6,9 @@ import { isPartner } from './app/lib/auth'
 export async function middleware(req: NextRequest) {
     const res = NextResponse.next()
 
-    // Safety check for environment variables to prevent runtime error
+    // Safety check for environment variables
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-        console.warn('Missing Supabase environment variables - middleware disabled')
+        console.warn('Missing Supabase environment variables - middleware disabled, skipping auth.')
         return res
     }
 
