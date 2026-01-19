@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/app/lib/supabaseClient";
-import { UserProfile } from "@/app/lib/types";
+import type { UserProfile } from "@/app/lib/types";
 import { Save, Loader2 } from "lucide-react";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 

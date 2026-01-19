@@ -1,4 +1,4 @@
-import { ValidationStatus } from "./productValidator";
+import type { ValidationStatus } from "./productValidator";
 
 export type StoreOffer = {
     storeName: string;

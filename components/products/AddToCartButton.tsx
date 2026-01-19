@@ -5,7 +5,7 @@ import { useState } from "react";
 import { track } from "@/app/lib/analytics";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 
-import { Product } from "@/app/lib/types";
+import type { Product } from "@/app/lib/types";
 
 export default function AddToCartButton({ product }: { product: Product }) {
     const { addItem } = useCart();

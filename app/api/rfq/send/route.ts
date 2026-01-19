@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
-import { CONTACTS_BY_CITY, DEFAULT_CONTACTS, StoreName, CityName } from "@/app/lib/storeContacts";
+import type { StoreName} from "@/app/lib/storeContacts";
+import { CONTACTS_BY_CITY, DEFAULT_CONTACTS, CityName } from "@/app/lib/storeContacts";
 import { routeRFQ } from "@/app/lib/routingEngine";
 import { PARTNERS } from "@/app/lib/partners";
 
@@ -127,7 +128,7 @@ SmartBuild Eesti meeskond`;
             const routingResult = routeRFQ(city, storeName);
 
             let storeEmail = routingResult?.destinationEmail;
-            let recipientName = routingResult?.targetName || storeName;
+            const recipientName = routingResult?.targetName || storeName;
 
             // Fallback (Final Safety Net)
             if (!storeEmail) {

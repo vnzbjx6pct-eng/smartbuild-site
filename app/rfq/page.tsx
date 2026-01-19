@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { useCart } from "@/components/cart/CartProvider";
 import Link from "next/link";
-import { SUPPORTED_STORES, SUPPORTED_CITIES, StoreName, CityName } from "@/app/lib/storeContacts";
+import type { StoreName, CityName } from "@/app/lib/storeContacts";
+import { SUPPORTED_STORES, SUPPORTED_CITIES } from "@/app/lib/storeContacts";
 import { track } from "@/app/lib/analytics";
 import { useUser } from "@/components/auth/UserProvider";
 import { useLanguage } from "@/components/i18n/LanguageProvider";

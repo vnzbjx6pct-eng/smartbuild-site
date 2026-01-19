@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import Papa from "papaparse";
 
@@ -36,7 +37,7 @@ export async function POST(req: NextRequest) {
         const parsed = Papa.parse(fileContent, { header: true, skipEmptyLines: true });
         const rows = parsed.data as any[];
 
-        let created = 0;
+        const created = 0;
         let updated = 0;
         let failed = 0;
         const errors: any[] = [];

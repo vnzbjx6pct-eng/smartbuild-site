@@ -6,8 +6,9 @@ import Link from "next/link";
 import { ArrowLeft, CheckCircle2, Clock, MapPin, Package, Phone, AlertCircle, Truck, Info, ChevronRight, HelpCircle, Star, Repeat, FileText, AlertTriangle, XCircle } from "lucide-react";
 import { supabase } from "@/app/lib/supabaseClient";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
-import { Order, OrderItem, Shipment } from "@/app/lib/types";
-import { getDeliveryUXState, DeliveryUXState } from "@/app/lib/delivery/ux";
+import type { Order, OrderItem, Shipment } from "@/app/lib/types";
+import type { DeliveryUXState } from "@/app/lib/delivery/ux";
+import { getDeliveryUXState } from "@/app/lib/delivery/ux";
 import { DeliverySeverity, DeliveryAction } from "@/app/lib/delivery/reasonCodes";
 
 // --- VIEW MODEL ---
@@ -177,13 +178,11 @@ export default function OrderDetailsPage() {
             });
         }
 
-        const uxState = getDeliveryUXState(order, order.shipments || []);
-
         return {
             id: order.id,
             displayId: order.id.slice(0, 8),
             humanStatus: statusMap[globalStatus],
-            uxState,
+            uxState: getDeliveryUXState(order, order.shipments || []),
             eta: etaDisplay,
             timeline,
             groups,

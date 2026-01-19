@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/app/lib/supabaseClient";
 import Link from "next/link";
 import { ChevronRight, Package, ShoppingCart } from "lucide-react";
-import { Order } from "@/app/lib/types";
+import type { Order } from "@/app/lib/types";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 
 export default function OrdersPage() {

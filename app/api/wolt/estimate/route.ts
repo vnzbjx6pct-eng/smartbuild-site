@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { WOLT_CONFIG, PARNU_WAREHOUSE, WoltEstimateRequest, WoltEstimateResponse } from "@/app/lib/wolt";
+import type { WoltEstimateRequest, WoltEstimateResponse } from "@/app/lib/wolt";
+import { WOLT_CONFIG, PARNU_WAREHOUSE } from "@/app/lib/wolt";
 
 export async function POST(request: Request) {
     try {

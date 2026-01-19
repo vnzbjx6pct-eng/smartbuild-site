@@ -107,7 +107,6 @@ export default function AccountOverview() {
                             </div>
                         </div>
                         <div className="space-y-2">
-                            {/* @ts-ignore */}
                             {lastOrder.items?.slice(0, 3).map((item: any) => (
                                 <div key={item.id} className="flex justify-between text-sm">
                                     <span className="text-slate-600">{item.qty}x {item.name}</span>

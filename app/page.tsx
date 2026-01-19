@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import ClientHomeTracker from "./ClientHomeTracker";
 import TrustLogos from "@/components/home/TrustLogos";
 import HowItWorks from "@/components/home/HowItWorks";

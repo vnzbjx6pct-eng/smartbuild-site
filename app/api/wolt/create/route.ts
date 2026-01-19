@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { WOLT_CONFIG, WoltOrderResponse } from "@/app/lib/wolt";
+import type { WoltOrderResponse } from "@/app/lib/wolt";
+import { WOLT_CONFIG } from "@/app/lib/wolt";
 
 export async function POST(request: Request) {
     try {

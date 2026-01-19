@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 
-import { Product } from "@/app/lib/types";
+import type { Product } from "@/app/lib/types";
 
 export type CartItem = Product & {
     qty: number;
@@ -30,6 +30,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         try {
             const stored = localStorage.getItem("sb_cart");
             if (stored) {
+                // eslint-disable-next-line react-hooks/exhaustive-deps
                 setItems(JSON.parse(stored));
             }
         } catch (e) {

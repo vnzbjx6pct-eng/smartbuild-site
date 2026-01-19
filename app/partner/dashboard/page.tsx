@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import DashboardClient from "./DashboardClient";
 import Link from "next/link";
 import { LayoutDashboard, LogOut } from "lucide-react";

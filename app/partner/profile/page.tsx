@@ -14,7 +14,6 @@ export default function PartnerProfilePage() {
             // Get store
             const { data: membership } = await supabase.from("store_users").select("store_id, stores(*)").eq("user_id", user.id).single();
             if (membership && membership.stores) {
-                // @ts-ignore
                 setStore(membership.stores);
             }
             setLoading(false);

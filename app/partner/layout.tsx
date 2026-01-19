@@ -50,7 +50,6 @@ export default function PartnerLayout({ children }: { children: React.ReactNode 
                 return;
             }
 
-            // @ts-ignore - Supabase types might imply array, but single() returns object
             setStoreName(memberships.stores?.name || "Minu Pood");
             setAuthorized(true);
             setLoading(false);

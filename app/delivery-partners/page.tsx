@@ -223,7 +223,7 @@ export default function DeliveryPartnersPage() {
                 <div className="container mx-auto px-4 max-w-3xl text-center">
                     <h2 className="text-2xl font-bold mb-6 text-blue-400">{txt.pitch.title}</h2>
                     <p className="text-xl leading-relaxed text-slate-300">
-                        "{txt.pitch.text}"
+                        &quot;{txt.pitch.text}&quot;
                     </p>
 
                     <div className="mt-12 p-6 bg-slate-800/50 rounded-2xl border border-slate-700 inline-block">

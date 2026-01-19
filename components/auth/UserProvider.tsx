@@ -1,7 +1,8 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { UserSession, getSession, login as serverLogin, logout as serverLogout } from "@/app/actions/auth";
+import type { UserSession} from "@/app/actions/auth";
+import { getSession, login as serverLogin, logout as serverLogout } from "@/app/actions/auth";
 import { supabase, signInWithOAuth, isDemoMode } from "@/app/lib/supabaseClient";
 
 type UserContextType = {

@@ -1,6 +1,6 @@
 import ProductsView from "@/components/products/ProductsView";
 import { PRODUCTS } from "@/app/lib/mockData";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
     title: "Ehitusmaterjalid — Hinnad ja pakkumised",

@@ -1,7 +1,8 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { Dictionary, ET_DICTIONARY, RU_DICTIONARY } from "@/app/lib/i18n/dictionary";
+import type { Dictionary } from "@/app/lib/i18n/dictionary";
+import { ET_DICTIONARY, RU_DICTIONARY } from "@/app/lib/i18n/dictionary";
 
 type Language = "et" | "ru";
 
@@ -24,6 +25,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         const saved = localStorage.getItem("sb_lang") as Language;
         if (saved === "et" || saved === "ru") {
+            // eslint-disable-next-line react-hooks/exhaustive-deps
             setLanguageState(saved);
         }
     }, []);

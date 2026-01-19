@@ -11,14 +11,14 @@ export type AnalyticsEventName =
     | 'partner_signup_click';
 
 export async function trackEvent(
-    eventName: AnalyticsEventName,
-    userId?: string,
-    properties: Record<string, any> = {}
+    eventName: string, // Relaxed type to allow flexible events
+    properties: Record<string, any> = {},
+    userId?: string
 ) {
     try {
         await supabase.from('analytics_events').insert({
             event_name: eventName,
-            user_id: userId,
+            user_id: userId || null,
             properties
         });
     } catch (e) {
@@ -26,6 +26,8 @@ export async function trackEvent(
         // Fail silently to not block user flow
     }
 }
+
+export const track = trackEvent;
 
 // Aggregation Helpers (SQL Wrappers)
 

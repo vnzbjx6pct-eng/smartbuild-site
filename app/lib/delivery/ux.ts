@@ -1,5 +1,6 @@
 import { DeliveryReasonCode, DeliverySeverity, DeliveryAction, REASON_SEVERITY, REASON_ACTION } from "./reasonCodes";
-import { Order, Shipment, ShipmentEvent } from "@/app/lib/types";
+import type { Order, Shipment} from "@/app/lib/types";
+import { ShipmentEvent } from "@/app/lib/types";
 
 export interface DeliveryUXState {
     severity: DeliverySeverity;
@@ -21,7 +22,7 @@ const SLA_THRESHOLDS = {
 
 export function getDeliveryUXState(order: Order, shipments: Shipment[]): DeliveryUXState {
     // 0. Default State (Happy Path)
-    let state: DeliveryUXState = {
+    const state: DeliveryUXState = {
         severity: DeliverySeverity.INFO,
         titleKey: "delivery.ux.status.normal.title",
         descriptionKey: "delivery.ux.status.normal.desc",

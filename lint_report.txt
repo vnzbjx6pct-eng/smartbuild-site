@@ -1,0 +1,102 @@
+
+/Users/dmitri/smartbuild-site/app/account/notifications/page.tsx
+  40:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/dmitri/smartbuild-site/app/account/notifications/page.tsx:40:9
+  38 |
+  39 |     useEffect(() => {
+> 40 |         fetchNotifications();
+     |         ^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  41 |     }, []);
+  42 |
+  43 |     const filteredNotifications = useMemo(() => {  react-hooks/set-state-in-effect
+
+/Users/dmitri/smartbuild-site/app/account/page.tsx
+  110:30  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+
+/Users/dmitri/smartbuild-site/app/api/cron/keepalive/route.ts
+  1:1  error  Imports "NextRequest" are only used as type  @typescript-eslint/consistent-type-imports
+
+/Users/dmitri/smartbuild-site/app/contact/page.tsx
+  18:5  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+
+/Users/dmitri/smartbuild-site/app/delivery-partners/page.tsx
+  226:25  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  226:42  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+/Users/dmitri/smartbuild-site/app/error.tsx
+  19:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/dmitri/smartbuild-site/app/error.tsx:19:9
+  17 |         // Generate a short error ID for support
+  18 |         const id = `ERR-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+> 19 |         setErrorId(id);
+     |         ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  20 |         console.error(`[GlobalError] ${id}:`, error);
+  21 |
+  22 |         // Optional: Send to logging service  react-hooks/set-state-in-effect
+
+/Users/dmitri/smartbuild-site/app/partner/join/page.tsx
+  51:77  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  51:92  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+/Users/dmitri/smartbuild-site/app/partner/layout.tsx
+  53:13  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+
+/Users/dmitri/smartbuild-site/app/partner/profile/page.tsx
+  17:17  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+
+/Users/dmitri/smartbuild-site/app/partners/contact/page.tsx
+  24:5  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+
+/Users/dmitri/smartbuild-site/components/cart/CartProvider.tsx
+  33:17  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/dmitri/smartbuild-site/components/cart/CartProvider.tsx:33:17
+  31 |             const stored = localStorage.getItem("sb_cart");
+  32 |             if (stored) {
+> 33 |                 setItems(JSON.parse(stored));
+     |                 ^^^^^^^^ Avoid calling setState() directly within an effect
+  34 |             }
+  35 |         } catch (e) {
+  36 |             console.error("Failed to load cart", e);  react-hooks/set-state-in-effect
+
+/Users/dmitri/smartbuild-site/components/cart/WoltSmartTip.tsx
+  44:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/dmitri/smartbuild-site/components/cart/WoltSmartTip.tsx:44:9
+  42 |
+  43 |         const check = checkDeliveryEligibility(hypotheticalItems, city);
+> 44 |         setIsEligible(check.state === 'eligible');
+     |         ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  45 |
+  46 |     }, [previewQty, items, suggestion, isRemove, city]);
+  47 |  react-hooks/set-state-in-effect
+
+✖ 14 problems (14 errors, 0 warnings)
+  1 error and 0 warnings potentially fixable with the `--fix` option.
+

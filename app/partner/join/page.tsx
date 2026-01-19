@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 import JoinForm from "./JoinForm";
 
@@ -37,6 +37,9 @@ export default function PartnerJoinPage() {
                         <span className="bg-white px-4 py-2 rounded-full border border-slate-200 shadow-sm flex items-center gap-2">
                             <span className="text-emerald-500">✓</span> Teie kontrollite kontakte
                         </span>
+                        <span className="bg-white px-4 py-2 rounded-full border border-slate-200 shadow-sm flex items-center gap-2">
+                            <p className="text-sm italic">&quot;SmartBuild on meie müüki kasvatanud 20% juba esimese kuuga.&quot;</p>
+                        </span>
                     </div>
                 </div>
 
@@ -48,7 +51,7 @@ export default function PartnerJoinPage() {
                 {/* Footer Explanation */}
                 <div className="text-center max-w-2xl mx-auto text-slate-500 text-sm space-y-4">
                     <p>
-                        <strong>Kuidas süsteem töötab?</strong> SmartBuildi "Routing Engine" tuvastab kliendi asukoha ja suunab päringu automaatselt
+                        <strong>Kuidas süsteem töötab?</strong> SmartBuildi &quot;Routing Engine&quot; tuvastab kliendi asukoha ja suunab päringu automaatselt
                         vastava linna kauplusesse. Kui olete lisanud mitu müügijuhti, jaotatakse päringud nende vahel võrdselt (Round-Robin).
                     </p>
                     <p>

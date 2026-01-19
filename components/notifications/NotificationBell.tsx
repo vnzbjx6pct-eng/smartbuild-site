@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Bell, Check, ChevronRight } from "lucide-react";
 import { supabase } from "@/app/lib/supabaseClient";
-import { Notification } from "@/app/lib/types";
+import type { Notification } from "@/app/lib/types";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -15,11 +15,11 @@ export default function NotificationBell() {
     const [unreadCount, setUnreadCount] = useState(0);
     const [isOpen, setIsOpen] = useState(false);
 
-    const fetchNotifications = async () => {
+    const fetchNotifications = useCallback(async () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        const { data, error } = await supabase
+        const { data } = await supabase
             .from('notifications')
             .select('*')
             .eq('user_id', user.id)
@@ -30,15 +30,16 @@ export default function NotificationBell() {
             setNotifications(data as any);
             setUnreadCount(data.filter((n: any) => !n.is_read).length);
         }
-    };
+    }, []);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         fetchNotifications();
 
         // Optional: Realtime subscription could go here
         const interval = setInterval(fetchNotifications, 60000); // Poll every minute
         return () => clearInterval(interval);
-    }, []);
+    }, [fetchNotifications]);
 
     const handleRead = async (n: Notification) => {
         if (!n.is_read) {

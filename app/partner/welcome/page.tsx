@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import PartnerContactForm from "./ContactForm";
 
 export const metadata: Metadata = {

@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { notifyOnShipmentChange } from "@/app/lib/notifications/service";
-import { DeliveryReasonCode } from "@/app/lib/delivery/reasonCodes";
+import type { DeliveryReasonCode } from "@/app/lib/delivery/reasonCodes";
 import { ShipmentStatus } from "@/app/lib/types";
 
 // Admin/Partner/Webhook endpoint

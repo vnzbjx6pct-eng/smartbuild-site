@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
-import { DeliveryReasonCode, REASON_SEVERITY, DeliverySeverity } from "../delivery/reasonCodes";
+import type { DeliveryReasonCode} from "../delivery/reasonCodes";
+import { REASON_SEVERITY, DeliverySeverity } from "../delivery/reasonCodes";
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -111,8 +112,8 @@ export async function notifyOnShipmentChange(params: NotifyParams) {
     // --- 4. CONTENT ---
     // Keys matched to dictionary updates
     // Map internal types to keys
-    let titleKey = `notifications.title.${notificationType}`;
-    let bodyKey = `notifications.body.${notificationType}`;
+    const titleKey = `notifications.title.${notificationType}`;
+    const bodyKey = `notifications.body.${notificationType}`;
 
     // --- 5. CHANNELS ---
     const channels = [];

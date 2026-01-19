@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/app/lib/supabaseClient";
 import { Loader2, Save, Truck, Info, Store } from "lucide-react";
-import { StoreDeliverySettings } from "@/app/lib/types";
+import type { StoreDeliverySettings } from "@/app/lib/types";
 
 const CITIES = ["Tallinn", "Tartu", "Pärnu", "Narva", "Rakvere", "Viljandi"];
 

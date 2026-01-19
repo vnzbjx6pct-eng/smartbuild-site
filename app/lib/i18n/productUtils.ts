@@ -1,4 +1,4 @@
-import { Product } from "@/app/lib/types";
+import type { Product } from "@/app/lib/types";
 
 export function getTranslatedProduct(product: Product, t: any) {
     const categoryName = t.categories?.[product.categoryKey] || product.category;

@@ -21,7 +21,6 @@ function PartnerContactContent() {
     const searchParams = useSearchParams();
     const initialType = searchParams.get('type') || 'store';
 
-    // @ts-ignore
     const strings = t.partners.form;
 
     // Form State

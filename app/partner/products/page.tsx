@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/app/lib/supabaseClient";
 import Link from "next/link";
 import { Plus, Search, Edit, Trash2 } from "lucide-react";
-import { StoreProduct } from "@/app/lib/types";
+import type { StoreProduct } from "@/app/lib/types";
 
 export default function PartnerProductsPage() {
     const [products, setProducts] = useState<StoreProduct[]>([]);

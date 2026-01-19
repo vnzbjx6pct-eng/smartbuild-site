@@ -1,7 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
-import { WoltEstimateResponse, WoltOrderResponse, splitCart, checkDeliveryEligibility, DELIVERY_LIMITS, getSmartSuggestion, CITIES, ResolutionCode, WoltEligibility } from "@/app/lib/wolt";
-import { CartItem, useCart } from "@/components/cart/CartProvider";
+import type { WoltEstimateResponse, WoltOrderResponse, WoltEligibility } from "@/app/lib/wolt";
+import { splitCart, checkDeliveryEligibility, DELIVERY_LIMITS, getSmartSuggestion, CITIES, ResolutionCode } from "@/app/lib/wolt";
+import type { CartItem} from "@/components/cart/CartProvider";
+import { useCart } from "@/components/cart/CartProvider";
 import WoltSmartTip from "./WoltSmartTip";
 
 type DeliveryMethod = "pickup" | "wolt";

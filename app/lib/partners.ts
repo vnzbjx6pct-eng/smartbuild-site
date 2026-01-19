@@ -1,4 +1,4 @@
-import { StoreName } from "./stores";
+import type { StoreName } from "./stores";
 
 export type PartnerTier = "free" | "partner" | "premium";
 export type LeadType = "free" | "paid";

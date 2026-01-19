@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import type { ReactNode } from "react";
+import { createContext, useContext, useState } from "react";
 import { X, CheckCircle, AlertCircle, Info } from "lucide-react";
 
 type ToastType = "success" | "error" | "info";
@@ -15,13 +16,15 @@ interface ToastContextType {
     toast: (message: string, type?: ToastType) => void;
 }
 
+const generateId = () => Math.random().toString(36).substring(2, 9);
+
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 export function ToastProvider({ children }: { children: ReactNode }) {
     const [toasts, setToasts] = useState<Toast[]>([]);
 
     const toast = (message: string, type: ToastType = "info") => {
-        const id = Math.random().toString(36).substring(2, 9);
+        const id = generateId();
         setToasts((prev) => [...prev, { id, message, type }]);
 
         setTimeout(() => {

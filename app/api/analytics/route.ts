@@ -1,6 +1,7 @@
 
 import { NextResponse } from "next/server";
-import { trackEvent, AnalyticsEventName } from "@/app/lib/analytics";
+import type { AnalyticsEventName } from "@/app/lib/analytics";
+import { trackEvent } from "@/app/lib/analytics";
 
 export async function POST(request: Request) {
     try {

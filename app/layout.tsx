@@ -1,6 +1,6 @@
 import "./globals.css";
 import Link from "next/link";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { Providers } from "@/app/providers";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";

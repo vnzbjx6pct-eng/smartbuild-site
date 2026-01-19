@@ -3,17 +3,19 @@
 import { useState } from "react";
 import Image from "next/image";
 import AddToCartButton from "./AddToCartButton";
-import { Product } from "@/app/lib/types";
-import { STORE_HOME_URL, StoreName } from "@/app/lib/stores";
+import type { Product } from "@/app/lib/types";
+import type { StoreName } from "@/app/lib/stores";
+import { STORE_HOME_URL } from "@/app/lib/stores";
 import { getProductImage } from "@/app/lib/imageUtils";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
+import { getPartnerConfig } from "@/app/lib/partners";
 
 export default function ProductCard({ product }: { product: Product }) {
     const { t } = useLanguage();
     const [showPrices, setShowPrices] = useState(false);
 
     // Monetization / Partner Logic
-    const { getPartnerConfig } = require("@/app/lib/partners");
+    // const { getPartnerConfig } = require("@/app/lib/partners");
 
     // Sort offers so we know the best one
     const sortedOffers = [...product.offers].sort((a, b) => a.price - b.price);

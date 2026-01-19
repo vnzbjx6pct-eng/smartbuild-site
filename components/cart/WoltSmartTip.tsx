@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Check, Truck } from "lucide-react";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
-import { SmartSuggestion, checkDeliveryEligibility } from "@/app/lib/wolt";
-import { CartItem } from "@/components/cart/CartProvider";
+import type { SmartSuggestion } from "@/app/lib/wolt";
+import { checkDeliveryEligibility } from "@/app/lib/wolt";
+import type { CartItem } from "@/components/cart/CartProvider";
 
 interface Props {
     suggestion: SmartSuggestion;
@@ -20,7 +21,7 @@ export default function WoltSmartTip({ suggestion, items, onApply, onUndo, city 
     const itemName = suggestion.itemName;
 
     // Local Logic for Preview
-    const [isEligible, setIsEligible] = useState(false);
+
 
     // Initial values
     const originalQty = suggestion.fromQty || 0;
@@ -31,7 +32,8 @@ export default function WoltSmartTip({ suggestion, items, onApply, onUndo, city 
     const isRemove = suggestion.type === "REMOVE_ITEM";
 
     // Hypothetical Check
-    useEffect(() => {
+    // Hypothetical Check
+    const isEligible = useMemo(() => {
         // Construct hypothetical cart
         const hypotheticalItems = items.map(item => {
             const isTarget = (item.id || item.name) === suggestion.itemId;
@@ -40,9 +42,8 @@ export default function WoltSmartTip({ suggestion, items, onApply, onUndo, city 
         }).filter(i => i.qty > 0);
 
         const check = checkDeliveryEligibility(hypotheticalItems, city);
-        setIsEligible(check.state === 'eligible');
-
-    }, [previewQty, items, suggestion, isRemove, city]);
+        return check.state === 'eligible';
+    }, [items, suggestion, isRemove, previewQty, city]);
 
     const handleApply = () => {
         const target = items.find(i => (i.id || i.name) === suggestion.itemId);

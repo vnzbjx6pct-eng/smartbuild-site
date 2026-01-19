@@ -1,4 +1,4 @@
-import { Product } from "./types";
+import type { Product } from "./types";
 
 export type ValidationStatus = "ACTIVE" | "DRAFT" | "REJECTED";
 

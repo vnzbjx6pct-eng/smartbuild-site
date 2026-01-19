@@ -16,6 +16,7 @@ export default function GlobalError({
     useEffect(() => {
         // Generate a short error ID for support
         const id = `ERR-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         setErrorId(id);
         console.error(`[GlobalError] ${id}:`, error);
 

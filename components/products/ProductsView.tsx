@@ -2,7 +2,7 @@
 
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 import ProductList from "./ProductList";
-import { Product } from "@/app/lib/types";
+import type { Product } from "@/app/lib/types";
 
 export default function ProductsView({ initialProducts }: { initialProducts: Product[] }) {
     const { t } = useLanguage();
