@@ -170,10 +170,11 @@ export default function ContactPage() {
                                 <HelpCircle size={24} />
                             </div>
                             <h2 className="text-2xl font-bold text-slate-800">{strings.faq.title}</h2>
+                            <p className="text-slate-500 mb-6 text-sm">{(strings.faq as any).intro}</p>
                         </div>
 
                         <div className="space-y-4">
-                            {[1, 2, 3].map((i) => (
+                            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
                                 <div
                                     key={i}
                                     className={`bg-white rounded-xl border transition-all duration-200 overflow-hidden ${openFaq === i ? 'border-orange-200 shadow-md' : 'border-slate-200 hover:border-slate-300'}`}
@@ -182,7 +183,7 @@ export default function ContactPage() {
                                         onClick={() => setOpenFaq(openFaq === i ? null : i)}
                                         className="w-full flex items-center justify-between p-5 text-left font-semibold text-slate-800"
                                     >
-                                        {strings.faq[`q${i}`]}
+                                        {(strings.faq as any)[`q${i}`]}
                                         <span className={`text-slate-400 transition-transform duration-200 ${openFaq === i ? 'rotate-180' : ''}`}>
                                             <ChevronDown size={20} />
                                         </span>
@@ -197,7 +198,20 @@ export default function ContactPage() {
                             ))}
                         </div>
 
-                        <div className="bg-slate-900 rounded-2xl p-8 text-white mt-10">
+                        {/* Customer Support CTA */}
+                        <div className="bg-blue-50 border border-blue-100 rounded-2xl p-8 text-center mt-10">
+                            <h3 className="font-bold text-slate-900 text-lg mb-2">{(strings.faq as any).no_answer}</h3>
+                            <button
+                                onClick={() => {
+                                    document.querySelector('input[name="topic"]')?.scrollIntoView({ behavior: 'smooth' });
+                                }}
+                                className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold transition-colors shadow-lg shadow-blue-500/20"
+                            >
+                                {(strings.faq as any).contact_us} <MessageSquare size={18} />
+                            </button>
+                        </div>
+
+                        <div className="bg-slate-900 rounded-2xl p-8 text-white mt-6">
                             <h3 className="font-bold text-xl mb-2">Oled ettevõte?</h3>
                             <p className="text-slate-300 mb-6">Pakume erilahendusi ehituspoodidele ja transpordifirmadele.</p>
                             <a

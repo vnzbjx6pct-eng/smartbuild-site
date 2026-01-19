@@ -607,12 +607,25 @@ export const ET_DICTIONARY = {
         },
         faq: {
             title: "Korduma kippuvad küsimused",
-            q1: "Kui kiiresti kaup saabub?",
-            a1: "Tavaliselt 1-3 tööpäeva jooksul, sõltuvalt poest ja tarneviisist.",
-            q2: "Kas saan tellimust muuta?",
-            a2: "Jah, võtke ühendust klienditoega enne kauba väljastamist.",
-            q3: "Kuidas toimub tagastus?",
-            a3: "14 päeva jooksul on võimalik kaup tagastada. Vaata täpsemaid tingimusi müügitingimustest."
+            intro: "Siit leiad vastused kõige sagedamini küsitud küsimustele SmartBuildi kohta.",
+            q1: "Kuidas SmartBuild töötab?",
+            a1: "SmartBuild võrdleb ehitusmaterjalide hindu erinevates Eesti poodides ja aitab leida parima pakkumise ühest kohast.",
+            q2: "Kas SmartBuild müüb ise kaupu?",
+            a2: "Ei. SmartBuild ei müü kaupu, vaid suunab sind partnerpoodi ostu sooritamiseks.",
+            q3: "Kuidas toimub kohaletoimetamine?",
+            a3: "Kohaletoimetamise tingimused sõltuvad poest ja valitud tarnest. SmartBuild kuvab kõik tingimused enne ostu.",
+            q4: "Kas hinnad on alati ajakohased?",
+            a4: "Jah. Hinnad uuenevad automaatselt partnerite andmete põhjal.",
+            q5: "Mida teha, kui hind poes erineb SmartBuildist?",
+            a5: "Võta meiega ühendust ja kontrollime info üle.",
+            q6: "Kas SmartBuildi kasutamine on tasuta?",
+            a6: "Jah, SmartBuild on kasutajatele tasuta.",
+            q7: "Kuidas poode valitakse?",
+            a7: "Teeme koostööd ainult usaldusväärsete ja ametlike müüjatega Eestis.",
+            q8: "Kuidas teiega ühendust võtta?",
+            a8: "Kasuta allolevat kontaktivormi – vastame tavaliselt 24 tunni jooksul.",
+            no_answer: "Ei leidnud vastust oma küsimusele?",
+            contact_us: "Võta meiega ühendust"
         }
     }
 
@@ -1226,12 +1239,25 @@ export const RU_DICTIONARY: Dictionary = {
         },
         faq: {
             title: "Часто задаваемые вопросы",
-            q1: "Как быстро придет товар?",
-            a1: "Обычно в течение 1-3 рабочих дней, в зависимости от магазина и способа доставки.",
-            q2: "Можно ли изменить заказ?",
-            a2: "Да, свяжитесь с поддержкой до отправки товара.",
-            q3: "Как оформить возврат?",
-            a3: "Товар можно вернуть в течение 14 дней. Детали в условиях продажи."
+            intro: "Здесь вы найдете ответы на самые часто задаваемые вопросы о SmartBuild.",
+            q1: "Как работает SmartBuild?",
+            a1: "SmartBuild сравнивает цены на строительные материалы в разных магазинах Эстонии и помогает выбрать лучшее предложение в одном месте.",
+            q2: "Продаёт ли SmartBuild товары?",
+            a2: "Нет. SmartBuild не продаёт товары, покупка происходит напрямую у магазина-партнёра.",
+            q3: "Как происходит доставка?",
+            a3: "Условия доставки зависят от магазина и выбранного способа доставки.",
+            q4: "Цены всегда актуальны?",
+            a4: "Да. Цены обновляются автоматически на основе данных партнёров.",
+            q5: "Что делать, если цена отличается?",
+            a5: "Свяжитесь с нами, мы проверим информацию.",
+            q6: "Сервис платный?",
+            a6: "Нет, сервис бесплатный для пользователей.",
+            q7: "Как выбираются магазины?",
+            a7: "Мы сотрудничаем только с проверенными и официальными продавцами в Эстонии.",
+            q8: "Как с вами связаться?",
+            a8: "Используйте форму ниже — обычно отвечаем в течение 24 часов.",
+            no_answer: "Не нашли ответ на свой вопрос?",
+            contact_us: "Свяжитесь с нами"
         }
     }
 
