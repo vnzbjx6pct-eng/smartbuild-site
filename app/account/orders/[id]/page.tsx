@@ -177,6 +177,8 @@ export default function OrderDetailsPage() {
             });
         }
 
+        const uxState = getDeliveryUXState(order, order.shipments || []);
+
         return {
             id: order.id,
             displayId: order.id.slice(0, 8),
