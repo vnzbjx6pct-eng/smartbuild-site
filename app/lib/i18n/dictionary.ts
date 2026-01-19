@@ -472,100 +472,101 @@ export const ET_DICTIONARY = {
             view_all: "Vaata kõiki",
             new_badge: "Uus"
         },
-        partners: {
-            title: "Vähem segadust. Rohkem müüki.",
-            subtitle: "SmartBuild edastab ainult kvaliteetsed ja struktureeritud päringud.",
-            how_it_works: {
-                title: "Kuidas see töötab?",
-                step1: "Klient valib tooted",
-                step2: "Määrab mahud",
-                step3: "Valib linna",
-                step4: "Saadab päringu"
-            },
-            demo_rfq: {
-                title: "Näidis päring",
-                city: "Linn",
-                items: "Tooted",
-                volume: "Maht",
-                deadline: "Tähtaeg",
-                client: "Klient",
-                example_city: "Tartu",
-                example_deadline: "Kiire",
-                example_client: "Ehitusfirma"
-            },
-            benefits: {
-                title: "Mida poed saavad?",
-                list: [
-                    "Vähem tühje päringuid",
-                    "Müügimeeskonna aja kokkuhoid",
-                    "Valmis ja konkreetsed kliendid",
-                    "Aus konkurents mahu pealt",
-                    "Turu analüütika ja statistika"
-                ]
-            },
-            allocation: {
-                title: "Tark jaotus",
-                text: "Päringud jaotatakse automaatselt vastavalt linnale ja koormusele. Ei mingit spämmimist."
-            },
-            analytics: {
-                title: "Turu ülevaade",
-                viz1: "Populaarsed tooted",
-                viz2: "Keskmine tellimus",
-                viz3: "Hinnatase"
-            },
-            cta: "Võta meiega ühendust"
+    },
+    partners: {
+        title: "Vähem segadust. Rohkem müüki.",
+        subtitle: "SmartBuild edastab ainult kvaliteetsed ja struktureeritud päringud.",
+        how_it_works: {
+            title: "Kuidas see töötab?",
+            step1: "Klient valib tooted",
+            step2: "Määrab mahud",
+            step3: "Valib linna",
+            step4: "Saadab päringu"
         },
-        delivery_partners: {
-            title: "Vähem tühistamisi. Rohkem kvaliteetseid tellimusi.",
-            subtitle: "SmartBuild filtreerib ehitusmaterjalide tellimused enne, kui need jõuavad kullerini.",
-            gate: {
-                title: "Smart Delivery Gate",
-                step1: "Klient loob korvi",
-                step2: "Automaatne arvutus",
-                step3: "Süsteem määrab",
-                step4: "Ainult sobivad tellimused",
-                caption: "Kuller ei saa sobimatut tellimust.",
-                types: {
-                    wolt: "Wolt sobilik",
-                    bolt: "Bolt sobilik",
-                    split: "Osaline tarne",
-                    store: "Ainult poe tarne",
-                    pickup: "Tulen ise järele"
-                }
-            },
-            reasons: {
-                title: "Miks tellimus ei sobi kiirtarneks?",
-                over_weight: "Kaal ületab lubatud piiri",
-                over_volume: "Maht ületab lubatud piiri",
-                stairs: "Puudub lift, liiga raske",
-                fragile: "Õrn toode (klaas, keraamika)",
-                category: "Kategooria ei ole toetatud"
-            },
-            split: {
-                title: "Osaline tarne — vähem probleeme",
-                desc: "Osa tellimusest sobib kiirtarneks, ülejäänu tarnib pood. Klient näeb seda ja kulleril pole üllatusi.",
-                example_store: "12 kotti tsementi — Pood tarnib",
-                example_express: "Tööriistad — Täna kohal"
-            },
-            benefits: {
-                title: "Mida kullerteenus saab?",
-                items: [
-                    "Vähem tühistamisi",
-                    "Vähem konflikte kättetoimetamisel",
-                    "Selged ja sobivad tellimused",
-                    "Uus kliendisement (ehitus)",
-                    "Etteaimatav koormus",
-                    "Vähem koormust klienditoele"
-                ]
-            },
-            pitch: {
-                title: "Kuidas me pakume koostööd",
-                text: "SmartBuild on ehitusmaterjalide tellimuste filter ja koordinaator. Me ei saada kulleritele sobimatuid tellimusi. Arvutame eelnevalt kaalu, mahu ja tingimused. Tarnele lähevad ainult reaalselt teostatavad tellimused. See vähendab tühistamisi ja avab uue turu."
-            },
-            cta: "Arutame koostööd",
-            cta_sub: "API-integratsioon arutatakse eraldi pärast MVP testimist."
-        }
+        demo_rfq: {
+            title: "Näidis päring",
+            city: "Linn",
+            items: "Tooted",
+            volume: "Maht",
+            deadline: "Tähtaeg",
+            client: "Klient",
+            example_city: "Tartu",
+            example_deadline: "Kiire",
+            example_client: "Ehitusfirma"
+        },
+        benefits: {
+            title: "Mida poed saavad?",
+            list: [
+                "Vähem tühje päringuid",
+                "Müügimeeskonna aja kokkuhoid",
+                "Valmis ja konkreetsed kliendid",
+                "Aus konkurents mahu pealt",
+                "Turu analüütika ja statistika"
+            ]
+        },
+        allocation: {
+            title: "Tark jaotus",
+            text: "Päringud jaotatakse automaatselt vastavalt linnale ja koormusele. Ei mingit spämmimist."
+        },
+        analytics: {
+            title: "Turu ülevaade",
+            viz1: "Populaarsed tooted",
+            viz2: "Keskmine tellimus",
+            viz3: "Hinnatase"
+        },
+        cta: "Võta meiega ühendust"
+    },
+    delivery_partners: {
+        title: "Vähem tühistamisi. Rohkem kvaliteetseid tellimusi.",
+        subtitle: "SmartBuild filtreerib ehitusmaterjalide tellimused enne, kui need jõuavad kullerini.",
+        gate: {
+            title: "Smart Delivery Gate",
+            step1: "Klient loob korvi",
+            step2: "Automaatne arvutus",
+            step3: "Süsteem määrab",
+            step4: "Ainult sobivad tellimused",
+            caption: "Kuller ei saa sobimatut tellimust.",
+            types: {
+                wolt: "Wolt sobilik",
+                bolt: "Bolt sobilik",
+                split: "Osaline tarne",
+                store: "Ainult poe tarne",
+                pickup: "Tulen ise järele"
+            }
+        },
+        reasons: {
+            title: "Miks tellimus ei sobi kiirtarneks?",
+            over_weight: "Kaal ületab lubatud piiri",
+            over_volume: "Maht ületab lubatud piiri",
+            stairs: "Puudub lift, liiga raske",
+            fragile: "Õrn toode (klaas, keraamika)",
+            category: "Kategooria ei ole toetatud"
+        },
+        split: {
+            title: "Osaline tarne — vähem probleeme",
+            desc: "Osa tellimusest sobib kiirtarneks, ülejäänu tarnib pood. Klient näeb seda ja kulleril pole üllatusi.",
+            example_store: "12 kotti tsementi — Pood tarnib",
+            example_express: "Tööriistad — Täna kohal"
+        },
+        benefits: {
+            title: "Mida kullerteenus saab?",
+            items: [
+                "Vähem tühistamisi",
+                "Vähem konflikte kättetoimetamisel",
+                "Selged ja sobivad tellimused",
+                "Uus kliendisement (ehitus)",
+                "Etteaimatav koormus",
+                "Vähem koormust klienditoele"
+            ]
+        },
+        pitch: {
+            title: "Kuidas me pakume koostööd",
+            text: "SmartBuild on ehitusmaterjalide tellimuste filter ja koordinaator. Me ei saada kulleritele sobimatuid tellimusi. Arvutame eelnevalt kaalu, mahu ja tingimused. Tarnele lähevad ainult reaalselt teostatavad tellimused. See vähendab tühistamisi ja avab uue turu."
+        },
+        cta: "Arutame koostööd",
+        cta_sub: "API-integratsioon arutatakse eraldi pärast MVP testimist."
     }
+
 };
 
 export const RU_DICTIONARY: Dictionary = {
@@ -1040,108 +1041,100 @@ export const RU_DICTIONARY: Dictionary = {
             view_all: "Смотреть все",
             new_badge: "Новое"
         },
-        partners: {
-            title: "Меньше хаоса. Больше продаж.",
-            subtitle: "SmartBuild передаёт только структурированные и готовые заявки.",
-            how_it_works: {
-                title: "Как это работает?",
-                step1: "Клиент выбирает товары",
-                step2: "Указывает объёмы",
-                step3: "Выбирает город",
-                step4: "Отправляет запрос"
-            },
-            demo_rfq: {
-                title: "Пример заявки",
-                city: "Город",
-                items: "Товаров",
-                volume: "Объём",
-                deadline: "Срок",
-                client: "Клиент",
-                example_city: "Тарту",
-                example_deadline: "Срочно",
-                example_client: "Строитель"
-            },
-            benefits: {
-                title: "Что получают магазины?",
-                list: [
-                    "Меньше пустых и неточных запросов",
-                    "Экономия времени менеджеров",
-                    "Готовые к покупке клиенты",
-                    "Честная конкуренция по объёму",
-                    "Аналитика рынка и трендов"
-                ]
-            },
-            allocation: {
-                title: "Умное распределение",
-                text: "Заявки распределяются автоматически по городу и загрузке менеджеров."
-            },
-            analytics: {
-                title: "Аналитика рынка",
-                viz1: "Популярные товары",
-                viz2: "Средний чек",
-                viz3: "Сравнение цен"
-            },
-            allocation: {
-                title: "Умное распределение",
-                text: "Заявки распределяются автоматически по городу и загрузке менеджеров."
-            },
-            analytics: {
-                title: "Аналитика рынка",
-                viz1: "Популярные товары",
-                viz2: "Средний чек",
-                viz3: "Сравнение цен"
-            },
-            cta: "Связаться с нами"
+    },
+    partners: {
+        title: "Меньше хаоса. Больше продаж.",
+        subtitle: "SmartBuild передаёт только структурированные и готовые заявки.",
+        how_it_works: {
+            title: "Как это работает?",
+            step1: "Клиент выбирает товары",
+            step2: "Указывает объёмы",
+            step3: "Выбирает город",
+            step4: "Отправляет запрос"
         },
-        delivery_partners: {
-            title: "Меньше отмен. Больше качественных заказов.",
-            subtitle: "SmartBuild фильтрует заказы на стройматериалы до того, как они попадут курьеру.",
-            gate: {
-                title: "Smart Delivery Gate",
-                step1: "Клиент собирает корзину",
-                step2: "Авторасчёт параметров",
-                step3: "Система присваивает тип",
-                step4: "Только подходящие заказы",
-                caption: "Курьер не получает неподходящий заказ.",
-                types: {
-                    wolt: "Wolt подходит",
-                    bolt: "Bolt подходит",
-                    split: "Частичная доставка",
-                    store: "Только магазин",
-                    pickup: "Самовывоз"
-                }
-            },
-            reasons: {
-                title: "Почему заказ не подходит для экспресс-доставки?",
-                over_weight: "Вес превышает лимит",
-                over_volume: "Объём превышает лимит",
-                stairs: "Нет лифта, тяжелый груз",
-                fragile: "Хрупкий товар",
-                category: "Категория не поддерживается"
-            },
-            split: {
-                title: "Частичная доставка — меньше проблем",
-                desc: "Часть заказа подходит для экспресс-доставки, остальное — доставка магазина. Клиент видит это заранее, курьер не сталкивается с сюрпризами.",
-                example_store: "12 мешков цемента — Доставка магазином",
-                example_express: "Инструменты — Wolt сегодня"
-            },
-            benefits: {
-                title: "Что получает доставка?",
-                items: [
-                    "Меньше отмен",
-                    "Меньше конфликтов",
-                    "Понятные заказы",
-                    "Новый сегмент клиентов (строительство)",
-                    "Предсказуемая нагрузка",
-                    "Меньше нагрузки на поддержку"
-                ]
-            },
-            pitch: {
-                title: "Как мы предлагаем сотрудничество",
-                text: "SmartBuild — это фильтр и координатор заказов на стройматериалы. Мы не отправляем курьерам неподходящие заказы. Мы заранее считаем вес, объём и условия доставки. В доставку попадают только те заказы, которые реально можно выполнить. Это снижает отмены, поддержку и негатив, и открывает новый рынок строительных доставок."
-            },
-            cta: "Обсудить сотрудничество",
-            cta_sub: "API-интеграция обсуждается после тестирования MVP."
-        }
+        demo_rfq: {
+            title: "Пример заявки",
+            city: "Город",
+            items: "Товаров",
+            volume: "Объём",
+            deadline: "Срок",
+            client: "Клиент",
+            example_city: "Тарту",
+            example_deadline: "Срочно",
+            example_client: "Строитель"
+        },
+        benefits: {
+            title: "Что получают магазины?",
+            list: [
+                "Меньше пустых и неточных запросов",
+                "Экономия времени менеджеров",
+                "Готовые к покупке клиенты",
+                "Честная конкуренция по объёму",
+                "Аналитика рынка и трендов"
+            ]
+        },
+
+        allocation: {
+            title: "Умное распределение",
+            text: "Заявки распределяются автоматически по городу и загрузке менеджеров."
+        },
+        analytics: {
+            title: "Аналитика рынка",
+            viz1: "Популярные товары",
+            viz2: "Средний чек",
+            viz3: "Сравнение цен"
+        },
+        cta: "Связаться с нами"
+    },
+    delivery_partners: {
+        title: "Меньше отмен. Больше качественных заказов.",
+        subtitle: "SmartBuild фильтрует заказы на стройматериалы до того, как они попадут курьеру.",
+        gate: {
+            title: "Smart Delivery Gate",
+            step1: "Клиент собирает корзину",
+            step2: "Авторасчёт параметров",
+            step3: "Система присваивает тип",
+            step4: "Только подходящие заказы",
+            caption: "Курьер не получает неподходящий заказ.",
+            types: {
+                wolt: "Wolt подходит",
+                bolt: "Bolt подходит",
+                split: "Частичная доставка",
+                store: "Только магазин",
+                pickup: "Самовывоз"
+            }
+        },
+        reasons: {
+            title: "Почему заказ не подходит для экспресс-доставки?",
+            over_weight: "Вес превышает лимит",
+            over_volume: "Объём превышает лимит",
+            stairs: "Нет лифта, тяжелый груз",
+            fragile: "Хрупкий товар",
+            category: "Категория не поддерживается"
+        },
+        split: {
+            title: "Частичная доставка — меньше проблем",
+            desc: "Часть заказа подходит для экспресс-доставки, остальное — доставка магазина. Клиент видит это заранее, курьер не сталкивается с сюрпризами.",
+            example_store: "12 мешков цемента — Доставка магазином",
+            example_express: "Инструменты — Wolt сегодня"
+        },
+        benefits: {
+            title: "Что получает доставка?",
+            items: [
+                "Меньше отмен",
+                "Меньше конфликтов",
+                "Понятные заказы",
+                "Новый сегмент клиентов (строительство)",
+                "Предсказуемая нагрузка",
+                "Меньше нагрузки на поддержку"
+            ]
+        },
+        pitch: {
+            title: "Как мы предлагаем сотрудничество",
+            text: "SmartBuild — это фильтр и координатор заказов на стройматериалы. Мы не отправляем курьерам неподходящие заказы. Мы заранее считаем вес, объём и условия доставки. В доставку попадают только те заказы, которые реально можно выполнить. Это снижает отмены, поддержку и негатив, и открывает новый рынок строительных доставок."
+        },
+        cta: "Обсудить сотрудничество",
+        cta_sub: "API-интеграция обсуждается после тестирования MVP."
     }
+
 };
