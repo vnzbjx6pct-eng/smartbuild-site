@@ -91,7 +91,7 @@ export default async function ProductsPage({
                     </div>
 
                     {/* Results */}
-                    {/* @ts-expect-error: Supabase types might be slightly off relative to our strict Product interface, ignoring for MVP */}
+
                     <ProductGrid products={products || []} />
 
                     {/* Pagination */}
