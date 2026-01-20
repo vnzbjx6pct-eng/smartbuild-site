@@ -1,8 +1,7 @@
-import { createClient } from '@/app/lib/supabaseServer';
+import { createServerClient } from '@/app/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import ProductDetailClient from './ProductDetailClient';
 import type { Metadata } from 'next';
-import { Product } from '@/app/types';
 
 export const revalidate = 60;
 
@@ -12,7 +11,7 @@ export async function generateMetadata({
     params: Promise<{ id: string }>
 }): Promise<Metadata> {
     const { id } = await params;
-    const supabase = await createClient();
+    const supabase = await createServerClient();
 
     const { data: product } = await supabase
         .from('products')
@@ -36,7 +35,7 @@ export default async function ProductDetailPage({
     params: Promise<{ id: string }>
 }) {
     const { id } = await params;
-    const supabase = await createClient();
+    const supabase = await createServerClient();
 
     // 1. Fetch Product with Partner Info
     const { data: product, error } = await supabase

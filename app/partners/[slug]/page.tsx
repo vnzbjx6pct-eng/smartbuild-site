@@ -1,4 +1,4 @@
-import { createClient } from "@/app/lib/supabaseServer";
+import { createServerClient } from "@/app/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { PartnerInfo } from "@/app/components/partners/PartnerInfo";
 import { PartnerProducts } from "@/app/components/partners/PartnerProducts";
@@ -14,7 +14,7 @@ interface PartnerPageProps {
 
 // 1. Generate Metadata
 export async function generateMetadata({ params }: PartnerPageProps) {
-    const supabase = await createClient();
+    const supabase = await createServerClient();
     const { data: partner } = await supabase
         .from('profiles')
         .select('company_name, description')
@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: PartnerPageProps) {
 
 // 2. Page Component
 export default async function PartnerDetailPage({ params }: PartnerPageProps) {
-    const supabase = await createClient();
+    const supabase = await createServerClient();
 
     // Fetch Partner and their products
     const { data: partner, error } = await supabase
@@ -59,7 +59,7 @@ export default async function PartnerDetailPage({ params }: PartnerPageProps) {
     }
 
     // Type casting because the join return type is dynamic
-    const typedPartner = partner as PartnerProfile & { products: any[] };
+    const typedPartner = partner as PartnerProfile & { products: Array<{ id: string; name: string; price: number }> };
     const products = typedPartner.products || [];
 
     return (

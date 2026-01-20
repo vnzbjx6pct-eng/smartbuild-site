@@ -1,6 +1,6 @@
 "use client";
 
-import { useCart } from "@/components/cart/CartProvider";
+import { useCart } from "@/app/components/cart/CartProvider";
 import { useState } from "react";
 import { track } from "@/app/lib/analytics";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
@@ -8,12 +8,12 @@ import { useLanguage } from "@/components/i18n/LanguageProvider";
 import type { Product } from "@/app/lib/types";
 
 export default function AddToCartButton({ product }: { product: Product }) {
-    const { addItem } = useCart();
+    const { addToCart } = useCart();
     const { t } = useLanguage();
     const [added, setAdded] = useState(false);
 
     const handleAdd = () => {
-        addItem(product);
+        addToCart(product.id, 1);
         track("add_to_cart_success", {
             product_id: product.id,
             product_name: product.name,

@@ -5,18 +5,33 @@ import { Check, Truck } from "lucide-react";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 import type { SmartSuggestion } from "@/app/lib/wolt";
 import { checkDeliveryEligibility } from "@/app/lib/wolt";
-import type { CartItem } from "@/components/cart/CartProvider";
+
+// Normalized cart item type (flat structure with qty, used by Wolt functions)
+type NormalizedCartItem = {
+    id: string;
+    productId: string;
+    qty: number;
+    name: string;
+    weightKg?: number;
+    volumeM3?: number;
+    lengthCm?: number;
+    widthCm?: number;
+    heightCm?: number;
+    bulky?: boolean;
+    fragile?: boolean;
+    deliveryClass?: "small" | "medium" | "heavy" | "oversize";
+};
 
 interface Props {
     suggestion: SmartSuggestion;
-    items: CartItem[];
-    onApply: (newItem: CartItem) => void;
+    items: NormalizedCartItem[];
+    onApply: (newItem: NormalizedCartItem) => void;
     onUndo: () => void;
-    originalItem?: CartItem;
+    originalItem?: NormalizedCartItem;
     city: string;
 }
 
-export default function WoltSmartTip({ suggestion, items, onApply, onUndo, city }: Props) {
+export default function WoltSmartTip({ suggestion, items, onApply, onUndo: _onUndo, city }: Props) {
     const { t } = useLanguage();
     const itemName = suggestion.itemName;
     const woltDict = ((t as unknown as Record<string, unknown>).wolt || {}) as Record<string, string>;

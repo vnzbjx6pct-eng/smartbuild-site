@@ -2,9 +2,25 @@ import { useState, useEffect, useMemo } from "react";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 import type { WoltEstimateResponse, WoltOrderResponse, WoltEligibility } from "@/app/lib/wolt";
 import { checkDeliveryEligibility, getSmartSuggestion, CITIES } from "@/app/lib/wolt";
-import type { CartItem } from "@/components/cart/CartProvider";
-import { useCart } from "@/components/cart/CartProvider";
+import type { CartItem } from "@/app/types";
+import { useCart } from "@/app/components/cart/CartProvider";
 import WoltSmartTip from "./WoltSmartTip";
+
+// Normalized cart item type (flat structure with qty, used by Wolt functions)
+type NormalizedCartItem = {
+    id: string;
+    productId: string;
+    qty: number;
+    name: string;
+    weightKg?: number;
+    volumeM3?: number;
+    lengthCm?: number;
+    widthCm?: number;
+    heightCm?: number;
+    bulky?: boolean;
+    fragile?: boolean;
+    deliveryClass?: "small" | "medium" | "heavy" | "oversize";
+};
 
 type DeliveryMethod = "pickup" | "wolt";
 
@@ -28,7 +44,7 @@ export default function WoltDeliveryWidget({
     const dict = t as unknown as Record<string, unknown>;
     const woltDict = (dict.wolt || {}) as Record<string, string>;
 
-    const { updateItem } = useCart();
+    const { updateQuantity } = useCart();
     const [method, setMethod] = useState<DeliveryMethod>("pickup");
     const [address, setAddress] = useState({ street: "", city: "Tallinn", phone: "" });
     const [estimate, setEstimate] = useState<WoltEstimateResponse | null>(null);
@@ -36,11 +52,22 @@ export default function WoltDeliveryWidget({
     const [order, setOrder] = useState<WoltOrderResponse | null>(null);
     const [eligibilityResult, setEligibilityResult] = useState<WoltEligibility | null>(null);
 
+    // Prepare items for Wolt (flatten structure for compatibility)
+    const normalizedItems: NormalizedCartItem[] = useMemo(() => {
+        return items.map(item => ({
+            ...item.product,
+            id: item.id, // Cart item ID
+            productId: item.product_id,
+            qty: item.quantity,
+            name: item.product.name // explicit name
+        }));
+    }, [items]);
+
     // Auto-check on load/change
     useEffect(() => {
-        const result = checkDeliveryEligibility(items, address.city);
+        const result = checkDeliveryEligibility(normalizedItems, address.city);
         setEligibilityResult(result);
-    }, [items, address.city]);
+    }, [normalizedItems, address.city]);
 
     // Load persisted preference
     useEffect(() => {
@@ -60,8 +87,8 @@ export default function WoltDeliveryWidget({
 
     // Calc split
     const eligibility = useMemo(() => {
-        return checkDeliveryEligibility(items, address.city);
-    }, [items, address.city]);
+        return checkDeliveryEligibility(normalizedItems, address.city);
+    }, [normalizedItems, address.city]);
 
     const isFullyEligible = eligibility.state === 'eligible';
     const isSplitPossible = eligibility.state === 'partial';
@@ -69,29 +96,17 @@ export default function WoltDeliveryWidget({
     // Enrich items for rendering
     const enrichedEligibleItems = useMemo(() => {
         return eligibility.eligibleItems.map(ei => {
-            const original = items.find(i => (i.id) === ei.id) || {
-                name: 'Unknown',
-                id: ei.id,
-                price: 0,
-                image: '',
-                qty: 0,
-                // Add required CartItem/Product properties mock
-                genericNameKey: 'prod_unknown',
-                categoryKey: 'cat_unknown',
-                category: 'Unknown',
-                unit: 'pcs',
-                offers: []
-            } as unknown as CartItem;
-            return { ...original, qty: ei.qty };
+            const original = normalizedItems.find(i => (i.id) === ei.id);
+            return { ...original!, qty: ei.qty };
         });
-    }, [eligibility, items]);
+    }, [eligibility, normalizedItems]);
 
     const enrichedIneligibleItems = useMemo(() => {
         return eligibility.ineligibleItems.map(ei => {
-            const original = items.find(i => (i.id) === ei.id);
-            return { item: { ...(original || {}), qty: original?.qty || 0 }, reasons: ei.reasons };
+            const original = normalizedItems.find(i => (i.id) === ei.id);
+            return { item: { ...(original || {}), qty: original?.qty || 0, name: original?.name || 'Unknown' }, reasons: ei.reasons };
         });
-    }, [eligibility, items]);
+    }, [eligibility, normalizedItems]);
 
     // On-the-fly Totals
     const eligibleTotals = useMemo(() => ({
@@ -100,7 +115,7 @@ export default function WoltDeliveryWidget({
     }), [enrichedEligibleItems]);
 
     const ineligibleTotals = useMemo(() => ({
-        weight: enrichedIneligibleItems.reduce((s, i) => s + (i.item.weightKg || 0) * (i.item.qty || 1), 0),
+        weight: enrichedIneligibleItems.reduce((s, i) => s + (i.item.weightKg || 0) * (i.item.qty || 1), 0), // Use number fallback
         count: enrichedIneligibleItems.reduce((s, i) => s + (i.item.qty || 1), 0)
     }), [enrichedIneligibleItems]);
 
@@ -109,8 +124,8 @@ export default function WoltDeliveryWidget({
     // Analytics: Track Tip Impression
     const suggestion = useMemo(() => {
         if (eligibility.ineligibleItems.length === 0) return null;
-        return getSmartSuggestion(items);
-    }, [items, eligibility]);
+        return getSmartSuggestion(normalizedItems);
+    }, [normalizedItems, eligibility]);
 
     useEffect(() => {
         if (method === "wolt" && suggestion && !isFullyEligible) {
@@ -167,7 +182,7 @@ export default function WoltDeliveryWidget({
         try {
             await new Promise(r => setTimeout(r, 600)); // Fake network delay
 
-            const result = checkDeliveryEligibility(items, address.city);
+            const result = checkDeliveryEligibility(normalizedItems, address.city);
             setEligibilityResult(result);
 
             if (result.state === 'eligible' || result.state === 'partial') {
@@ -286,12 +301,16 @@ export default function WoltDeliveryWidget({
                         <div className="w-full mt-2" onClick={e => { e.preventDefault(); e.stopPropagation(); }}>
                             <WoltSmartTip
                                 suggestion={suggestion}
-                                items={items}
+                                items={normalizedItems}
                                 city={address.city}
-                                onApply={(newItem) => updateItem(newItem.id, newItem.qty)}
+                                onApply={(newItem) => {
+                                    // newItem has qty, but updateQuantity expects cart item id and quantity
+                                    // Find the original cart item ID from normalizedItems
+                                    updateQuantity(newItem.id, newItem.qty);
+                                }}
                                 onUndo={() => {
                                     if (lastAction && lastAction.type === "REDUCE_QTY") {
-                                        updateItem(lastAction.itemId, lastAction.originalQty);
+                                        updateQuantity(lastAction.itemId, lastAction.originalQty);
                                     }
                                     setLastAction(null);
                                 }}

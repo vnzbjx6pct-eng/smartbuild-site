@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useCart } from "@/components/cart/CartProvider";
+import { useCart } from "@/app/components/cart/CartProvider";
 import Link from "next/link";
 import type { StoreName, CityName } from "@/app/lib/storeContacts";
 import { SUPPORTED_STORES, SUPPORTED_CITIES } from "@/app/lib/storeContacts";
@@ -13,7 +13,8 @@ import { getTranslatedProduct } from "@/app/lib/i18n/productUtils";
 const CITIES = SUPPORTED_CITIES;
 
 export default function RFQWizardPage() {
-    const { items, clear } = useCart();
+    const { cart, clearCart } = useCart();
+    const items = cart?.items || [];
     const { user, login } = useUser();
     const { t } = useLanguage();
     const [step, setStep] = useState(1);
@@ -148,7 +149,7 @@ export default function RFQWizardPage() {
             logFunnel("RFQ_SUCCESS");
             track("rfq_success");
             if (window.innerWidth < 768) track("mobile_rfq_completed");
-            clear();
+            clearCart();
             window.scrollTo(0, 0);
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : String(err);
@@ -238,13 +239,13 @@ export default function RFQWizardPage() {
                             {/* Mobile: Card View */}
                             <div className="block sm:hidden space-y-4 mb-4">
                                 {items.map((item) => {
-                                    const { displayName, unitName } = getTranslatedProduct(item, t);
+                                    const { displayName, unitName } = getTranslatedProduct(item.product, t);
                                     return (
                                         <div key={item.id} className="bg-slate-900/50 p-4 rounded-xl border border-slate-700">
                                             <div className="font-bold text-slate-200 mb-1">{displayName}</div>
                                             <div className="flex justify-between items-center text-sm text-slate-400">
                                                 <span>{t.common.quantity}:</span>
-                                                <span className="font-semibold text-slate-200">{item.qty} {unitName ?? t.common.pcs}</span>
+                                                <span className="font-semibold text-slate-200">{item.quantity} {unitName ?? t.common.pcs}</span>
                                             </div>
                                         </div>
                                     );
@@ -262,12 +263,12 @@ export default function RFQWizardPage() {
                                     </thead>
                                     <tbody className="divide-y divide-slate-700/50">
                                         {items.map((item) => {
-                                            const { displayName, unitName } = getTranslatedProduct(item, t);
+                                            const { displayName, unitName } = getTranslatedProduct(item.product, t);
                                             return (
                                                 <tr key={item.id}>
                                                     <td className="p-4 font-medium text-slate-200">{displayName}</td>
                                                     <td className="p-4 text-right text-slate-400">
-                                                        {item.qty} {unitName ?? t.common.pcs}
+                                                        {item.quantity} {unitName ?? t.common.pcs}
                                                     </td>
                                                 </tr>
                                             );

@@ -6,7 +6,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save } from "lucide-react";
 
-export default function AddProductPage() {
+export const dynamic = 'force-dynamic';
+
+export default function NewProductPage() {
     const [loading, setLoading] = useState(false);
     const [storeId, setStoreId] = useState<string | null>(null);
     const router = useRouter();

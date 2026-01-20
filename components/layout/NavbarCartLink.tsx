@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useCart } from "@/components/cart/CartProvider";
+import { useCart } from "@/app/components/cart/CartProvider";
 import { useLanguage } from "@/components/i18n/LanguageProvider";
 
 export default function NavbarCartLink() {
-    const { totalItems } = useCart();
+    const { cart } = useCart();
     const { t } = useLanguage();
+    const totalItems = cart?.itemsCount || 0;
 
     return (
         <Link href="/cart" className="text-sm font-medium text-slate-300 hover:text-white transition-colors flex items-center gap-2 group">

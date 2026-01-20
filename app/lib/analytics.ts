@@ -1,5 +1,7 @@
 
-import { supabase } from './supabaseServer';
+import { createBrowserClient } from '@/app/lib/supabase/client';
+
+const supabase = createBrowserClient();
 
 export type AnalyticsEventName =
     | 'view_home'
@@ -12,7 +14,7 @@ export type AnalyticsEventName =
 
 export async function trackEvent(
     eventName: string, // Relaxed type to allow flexible events
-    properties: Record<string, any> = {},
+    properties: Record<string, unknown> = {},
     userId?: string
 ) {
     try {
@@ -31,7 +33,7 @@ export const track = trackEvent;
 
 // Aggregation Helpers (SQL Wrappers)
 
-export async function getFunnelStats(startDate: string, endDate: string) {
+export async function getFunnelStats(_startDate: string, _endDate: string) {
     // In a real scenario, this would be a complex SQL Group By or multiple queries.
     // For MVP, we'll mock or doing simple counts if table populated.
     // Ideally use Supabase RPC or just Count queries.

@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/app/lib/supabaseServer";
+import { createServerClient } from "@/app/lib/supabase/server";
 import { calculateLeadScore } from "@/app/lib/leadScoring";
 
 export async function POST(request: Request) {
+    const supabase = await createServerClient();
     try {
         const body = await request.json();
         const {

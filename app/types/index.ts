@@ -20,6 +20,16 @@ export interface Product {
     sku?: string;
     created_at: string;
     profiles?: Profile; // Relation
+
+    // Delivery properties (for Wolt eligibility)
+    weightKg?: number;
+    volumeM3?: number;
+    lengthCm?: number;
+    widthCm?: number;
+    heightCm?: number;
+    bulky?: boolean;
+    fragile?: boolean;
+    deliveryClass?: "small" | "medium" | "heavy" | "oversize";
 }
 
 export interface ProductFilterParams {
