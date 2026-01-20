@@ -12,6 +12,7 @@ import {
     ChevronDown,
     ChevronUp
 } from "lucide-react";
+import Link from "next/link";
 
 export default function ContactPage() {
     const { t } = useLanguage();
@@ -213,12 +214,12 @@ export default function ContactPage() {
                         <div className="bg-slate-900 rounded-2xl p-8 text-white mt-6">
                             <h3 className="font-bold text-xl mb-2">Oled ettevõte?</h3>
                             <p className="text-slate-300 mb-6">Pakume erilahendusi ehituspoodidele ja transpordifirmadele.</p>
-                            <a
+                            <Link
                                 href="/partners"
                                 className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-lg font-bold transition-colors text-sm"
                             >
                                 Vaata partnerprogrammi <ArrowRightIcon size={16} />
-                            </a>
+                            </Link>
                         </div>
                     </div>
 

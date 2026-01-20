@@ -1,91 +1,101 @@
-import { supabase } from "../../lib/supabaseClient";
-import Link from "next/link";
-import ClientProductDetail from "./ClientProductDetail";
+import { createClient } from '@/app/lib/supabaseServer';
+import { notFound } from 'next/navigation';
+import ProductDetailClient from './ProductDetailClient';
+import type { Metadata } from 'next';
+import { Product } from '@/app/types';
 
 export const revalidate = 60;
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+export async function generateMetadata({
+    params
+}: {
+    params: Promise<{ id: string }>
+}): Promise<Metadata> {
     const { id } = await params;
-    const { data: product } = await supabase.from('products').select('name').eq('id', id).single();
+    const supabase = await createClient();
+
+    const { data: product } = await supabase
+        .from('products')
+        .select('name, description, image_url')
+        .eq('id', id)
+        .eq('is_active', true)
+        .single();
+
     return {
-        title: product ? `${product.name} hind — Võrdlus` : 'Toode puudub',
-        description: product ? `${product.name} parim hind Eestis. Võrdle pakkumisi erinevatest ehituspoodidest SmartBuildis.` : 'Vaata ehitusmaterjalide hindu.',
+        title: product ? `${product.name} - SmartBuild` : 'Toode puudub',
+        description: product?.description ? product.description.substring(0, 160) : 'Ehitusmaterjalid parima hinnaga.',
+        openGraph: {
+            images: product?.image_url ? [product.image_url] : [],
+        },
     };
 }
 
-export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ProductDetailPage({
+    params
+}: {
+    params: Promise<{ id: string }>
+}) {
     const { id } = await params;
+    const supabase = await createClient();
 
-    // Fetch product and ALL offers with brand info (mock for now if no DB)
-    // NOTE: In previous context, we might rely on Supabase, but restrictions said "No Supabase" for new stuff.
-    // However, this file imports 'supabase'. Assuming it works or is a mock client.
-    // If this fails, we should check if supabaseClient is actually mock. 
-    // Based on user request: "Данные: mock (без Supabase)".
-    // So likely the existing code tries to use supabase but it might be broken or mocked?
-    // User said "Code relating to the user's requests should be written... Avoid adding Supabase".
-    // I see existing code uses supabase. I will stick to what is there but add JSON-LD.
-
-    // Actually, I should probably check if supabase client is real or mock. 
-    // But I must not break existing architecture.
-
+    // 1. Fetch Product with Partner Info
     const { data: product, error } = await supabase
         .from('products')
         .select(`
-      *,
-      offers (
-        id,
-        price,
-        updated_at,
-        url,
-        brands (
-           name,
-           slug,
-           logo_url
-        )
-      )
-    `)
+            *,
+            profiles!products_partner_id_fkey (
+                company_name,
+                company_slug
+            )
+        `)
         .eq('id', id)
+        .eq('is_active', true)
         .single();
 
-    // JSON-LD Construction
-    const jsonLd = product ? {
+    if (error || !product) {
+        notFound();
+    }
+
+    // 2. Fetch Similar Products
+    const { data: similarProducts } = await supabase
+        .from('products')
+        .select('id, name, price, image_url, category')
+        .eq('category', product.category)
+        .eq('is_active', true)
+        .neq('id', id)
+        .limit(4);
+
+    // JSON-LD Structured Data
+    const jsonLd = {
         '@context': 'https://schema.org',
         '@type': 'Product',
         name: product.name,
-        description: `Võrdle ${product.name} hindu.`,
-        offers: product.offers?.map((offer: { price: number; brands?: { name: string } }) => ({
+        description: product.description,
+        image: product.image_url ? [product.image_url] : [],
+        offers: {
             '@type': 'Offer',
-            price: offer.price,
+            price: product.price,
             priceCurrency: 'EUR',
+            availability: product.stock > 0
+                ? 'https://schema.org/InStock'
+                : 'https://schema.org/OutOfStock',
             seller: {
                 '@type': 'Organization',
-                name: offer.brands?.name
+                name: product.profiles?.company_name
             }
-        }))
-    } : null;
-
-    if (error || !product) {
-        return (
-            <div className="container mx-auto px-4 py-20 text-center">
-                <h1 className="text-2xl font-bold text-slate-900 mb-4">Toodet ei leitud</h1>
-                <Link href="/products" className="text-orange-600 hover:underline">Tagasi kataloogi</Link>
-            </div>
-        );
-    }
-
-    // Sort offers by price (ascending)
-    const offers = product.offers?.sort((a: { price: number }, b: { price: number }) => a.price - b.price) || [];
-    const bestPrice = offers.length > 0 ? offers[0].price : null;
+        },
+    };
 
     return (
         <>
-            {jsonLd && (
-                <script
-                    type="application/ld+json"
-                    dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-                />
-            )}
-            <ClientProductDetail product={product} bestPrice={bestPrice} offers={offers} />
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+            <ProductDetailClient
+                product={product}
+                similarProducts={similarProducts || []}
+            />
         </>
     );
 }

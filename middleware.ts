@@ -1,7 +1,7 @@
 import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { isPartner } from './app/lib/auth'
+
 
 export async function middleware(req: NextRequest) {
     const res = NextResponse.next()
@@ -19,8 +19,8 @@ export async function middleware(req: NextRequest) {
         data: { session },
     } = await supabase.auth.getSession()
 
-    // Protect /account/partner routes
-    if (req.nextUrl.pathname.startsWith('/account/partner')) {
+    // Protect /account/partner and /partner routes
+    if (req.nextUrl.pathname.startsWith('/account/partner') || req.nextUrl.pathname.startsWith('/partner')) {
 
         if (!session) {
             const redirectUrl = req.nextUrl.clone()
@@ -29,8 +29,16 @@ export async function middleware(req: NextRequest) {
             return NextResponse.redirect(redirectUrl)
         }
 
-        // Check Role
-        const isPartnerUser = await isPartner(session.user, supabase)
+        // Check Role via Profiles Table
+        // We query the 'profiles' table directly to ensure we use valid DB data, not just metadata.
+        // RLS ensures we can only read our own profile.
+        const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', session.user.id)
+            .single()
+
+        const isPartnerUser = !error && profile?.role === 'partner'
 
         if (!isPartnerUser) {
             const redirectUrl = req.nextUrl.clone()

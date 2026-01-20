@@ -245,3 +245,21 @@ export interface NotificationEvent {
     error?: string;
     created_at: string;
 }
+
+export interface PartnerProfile {
+    id: string;
+    role: 'partner';
+    company_name: string;
+    company_slug: string;
+    description: string | null;
+    logo_url: string | null;
+    contact_email: string | null;
+    phone: string | null;
+    address: {
+        street?: string;
+        city?: string;
+        postal_code?: string;
+        country?: string;
+    } | null;
+}
+

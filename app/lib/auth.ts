@@ -11,31 +11,38 @@ import type { SupabaseClient, User } from '@supabase/supabase-js';
  * @param user The user object from Supabase auth
  * @param supabaseClient Optional supabase client for DB fallback check
  */
+// Helper to check role string directly
+export function isPartnerRole(role?: string | null): boolean {
+    return role === 'partner';
+}
+
+/**
+ * Checks if the user has the 'partner' role.
+ * Now prioritizes checking the 'profiles' table if a Supabase client is provided.
+ * 
+ * @param user The user object (used for ID)
+ * @param supabaseClient Supabase client for DB check
+ */
 export async function isPartner(user: User, supabaseClient?: SupabaseClient): Promise<boolean> {
     if (!user) return false;
 
-    // 1. Check app_metadata (secure, usually set by admin)
-    if (user.app_metadata?.role === 'partner') return true;
-
-    // 2. Check user_metadata (often used for quick prototyping, editable by user if not careful, but acceptable for first pass)
-    if (user.user_metadata?.role === 'partner') return true;
-
-    // 3. Fallback: Check profiles table if client is provided
+    // 1. If client provided, check DB (Single Source of Truth)
     if (supabaseClient) {
-        try {
-            const { data, error } = await supabaseClient
-                .from('profiles')
-                .select('role')
-                .eq('id', user.id)
-                .single();
+        const { data, error } = await supabaseClient
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
 
-            if (!error && data && data.role === 'partner') {
-                return true;
-            }
-        } catch (err) {
-            console.error('Error checking partner role in profiles:', err);
+        if (!error && data && isPartnerRole(data.role)) {
+            return true;
         }
     }
+
+    // 2. Fallback: Check metadata (legacy or if no client provided)
+    // IMPORTANT: This should be avoided for critical checks, use DB where possible.
+    if (user.app_metadata?.role === 'partner') return true;
+    if (user.user_metadata?.role === 'partner') return true;
 
     return false;
 }
