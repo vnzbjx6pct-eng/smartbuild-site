@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { Package, ShoppingCart, TrendingUp, ArrowRight } from "lucide-react";
-import { createServerClient } from "@/app/lib/supabase/server";
+import { createSupabaseServerClient } from "@/app/lib/supabase/server";
 
 export const dynamic = 'force-dynamic';
 
 export default async function PartnerDashboardPage() {
-    const supabase = createServerClient();
+    const supabase = await createSupabaseServerClient();
 
     // Get Session
     const { data: { session } } = await supabase.auth.getSession();

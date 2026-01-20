@@ -1,10 +1,10 @@
 'use server'
 
-import { createServerClient } from "@/app/lib/supabase/server";
+import { createSupabaseServerClient } from "@/app/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
 export async function createProduct(formData: FormData) {
-    const supabase = createServerClient();
+    const supabase = await createSupabaseServerClient();
 
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw new Error("Unauthorized");
@@ -30,7 +30,7 @@ export async function createProduct(formData: FormData) {
 }
 
 export async function updateProduct(id: string, formData: FormData) {
-    const supabase = createServerClient();
+    const supabase = await createSupabaseServerClient();
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw new Error("Unauthorized");
 
@@ -59,7 +59,7 @@ export async function updateProduct(id: string, formData: FormData) {
 }
 
 export async function toggleProductStatus(id: string, isActive: boolean) {
-    const supabase = createServerClient();
+    const supabase = await createSupabaseServerClient();
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw new Error("Unauthorized");
 

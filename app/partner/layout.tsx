@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
-import { createServerClient } from "@/app/lib/supabase/server";
+import { createSupabaseServerClient } from "@/app/lib/supabase/server";
 import PartnerSidebar from "./PartnerSidebar";
 
 export default async function PartnerLayout({ children }: { children: React.ReactNode }) {
-    const supabase = createServerClient();
+    const supabase = await createSupabaseServerClient();
 
     // 1. Check Session
     const { data: { session } } = await supabase.auth.getSession();

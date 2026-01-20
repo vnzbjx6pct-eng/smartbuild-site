@@ -1,10 +1,10 @@
 'use server'
 
-import { createServerClient } from "@/app/lib/supabase/server";
+import { createSupabaseServerClient } from "@/app/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
 export async function updateOrderStatus(id: string, newStatus: string) {
-    const supabase = createServerClient();
+    const supabase = await createSupabaseServerClient();
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw new Error("Unauthorized");
 

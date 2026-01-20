@@ -1,4 +1,4 @@
-import { createServerClient } from '@/app/lib/supabase/server';
+import { createSupabaseServerClient } from '@/app/lib/supabase/server';
 import ProductGrid from "@/app/components/products/ProductGrid";
 import ProductFilters from "@/app/components/products/ProductFilters";
 import Pagination from "@/app/components/products/Pagination";
@@ -25,7 +25,7 @@ export default async function ProductsPage({
     const limit = 24;
     const offset = (page - 1) * limit;
 
-    const supabase = await createServerClient();
+    const supabase = await createSupabaseServerClient();
 
     let query = supabase
         .from('products')

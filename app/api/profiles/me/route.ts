@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
-import { createServerClient } from '@/app/lib/supabase-server';
+import { createSupabaseRouteClient } from '@/app/lib/supabase-server';
 
 export async function GET() {
-    const supabase = createServerClient();
+    const supabase = await createSupabaseRouteClient();
 
     const {
         data: { session },

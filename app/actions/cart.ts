@@ -1,6 +1,6 @@
 "use server";
 
-import { createServerClient } from "@/app/lib/supabase/server";
+import { createSupabaseServerClient } from "@/app/lib/supabase/server";
 import { cookies } from "next/headers";
 import type { Cart, CartItem } from "@/app/types";
 import { revalidatePath } from "next/cache";
@@ -27,7 +27,7 @@ async function getCartSessionId(): Promise<string> {
 
 // Fetch the current cart
 export async function getCart(): Promise<Cart> {
-    const supabase = await createServerClient();
+    const supabase = await createSupabaseServerClient();
     const sessionId = await getCartSessionId();
 
     // Check if user is logged in
@@ -81,7 +81,7 @@ export async function getCart(): Promise<Cart> {
 }
 
 export async function addToCart(productId: string, quantity: number = 1) {
-    const supabase = await createServerClient();
+    const supabase = await createSupabaseServerClient();
     const sessionId = await getCartSessionId();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -124,7 +124,7 @@ export async function addToCart(productId: string, quantity: number = 1) {
 }
 
 export async function removeFromCart(itemId: string) {
-    const supabase = await createServerClient();
+    const supabase = await createSupabaseServerClient();
     const { error } = await supabase.from('cart_items').delete().eq('id', itemId);
 
     if (error) throw new Error(error.message);
@@ -134,7 +134,7 @@ export async function removeFromCart(itemId: string) {
 }
 
 export async function updateCartItem(itemId: string, quantity: number) {
-    const supabase = await createServerClient();
+    const supabase = await createSupabaseServerClient();
 
     if (quantity <= 0) {
         return removeFromCart(itemId);
@@ -152,7 +152,7 @@ export async function updateCartItem(itemId: string, quantity: number) {
 }
 
 export async function clearCart() {
-    const supabase = await createServerClient();
+    const supabase = await createSupabaseServerClient();
     const sessionId = await getCartSessionId();
     const { data: { user } } = await supabase.auth.getUser();
 

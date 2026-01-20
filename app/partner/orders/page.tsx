@@ -1,10 +1,10 @@
-import { createServerClient } from "@/app/lib/supabase/server";
+import { createSupabaseServerClient } from "@/app/lib/supabase/server";
 import OrdersTableClient from "./OrdersTableClient";
 
 export const dynamic = 'force-dynamic';
 
 export default async function PartnerOrdersPage({ searchParams }: { searchParams: { status?: string } }) {
-    const supabase = createServerClient();
+    const supabase = await createSupabaseServerClient();
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return <div>Access Denied</div>;
 

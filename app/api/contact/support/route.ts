@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { createServerClient } from "@/app/lib/supabase/server";
+import { createSupabaseServerClient } from "@/app/lib/supabase/server";
 // import { Resend } from "resend";
 
 // const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(request: Request) {
     try {
-        const supabase = await createServerClient();
+        const supabase = await createSupabaseServerClient();
         const body = await request.json();
         const { name, email, topic, message } = body;
 

@@ -1,4 +1,4 @@
-import { createServerClient } from "@/app/lib/supabase/server";
+import { createSupabaseServerClient } from "@/app/lib/supabase/server";
 import { notFound } from "next/navigation";
 import OrderDetailsClient from "@/app/partner/orders/[id]/OrderDetailsClient";
 import Link from "next/link";
@@ -7,7 +7,7 @@ import { ArrowLeft } from "lucide-react";
 export const dynamic = 'force-dynamic';
 
 export default async function OrderDetailsPage({ params }: { params: { id: string } }) {
-    const supabase = createServerClient();
+    const supabase = await createSupabaseServerClient();
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return <div>Access Denied</div>;
 

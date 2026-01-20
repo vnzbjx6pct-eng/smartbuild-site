@@ -1,5 +1,4 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
+import { createSupabaseServerClient } from "@/app/lib/supabase/server";
 import { getPartnerProducts } from "@/app/actions/partner";
 import PartnerDashboardClient from "./PartnerDashboardClient";
 import { redirect } from "next/navigation";
@@ -15,8 +14,7 @@ interface PartnerProduct {
 }
 
 export default async function PartnerDashboardPage() {
-    const cookieStore = cookies();
-    const supabase = createServerComponentClient({ cookies: () => cookieStore });
+    const supabase = await createSupabaseServerClient();
 
     const { data: { session } } = await supabase.auth.getSession();
 

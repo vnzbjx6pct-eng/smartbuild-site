@@ -1,4 +1,4 @@
-import { createServerClient } from "@/app/lib/supabase/server";
+import { createSupabaseServerClient } from "@/app/lib/supabase/server";
 import { PartnerCard } from "@/app/components/partners/PartnerCard";
 import type { PartnerProfile } from "@/app/lib/types";
 import { Store as StoreIcon, Search } from "lucide-react";
@@ -6,7 +6,7 @@ import { Store as StoreIcon, Search } from "lucide-react";
 export const revalidate = 3600; // Revalidate every hour
 
 export default async function PartnersListPage() {
-    const supabase = await createServerClient();
+    const supabase = await createSupabaseServerClient();
 
     // Fetch partners with product count
     const { data: partners, error } = await supabase

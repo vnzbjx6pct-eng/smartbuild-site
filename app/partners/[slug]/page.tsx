@@ -1,4 +1,4 @@
-import { createServerClient } from "@/app/lib/supabase/server";
+import { createSupabaseServerClient } from "@/app/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { PartnerInfo } from "@/app/components/partners/PartnerInfo";
 import { PartnerProducts } from "@/app/components/partners/PartnerProducts";
@@ -14,7 +14,7 @@ interface PartnerPageProps {
 
 // 1. Generate Metadata
 export async function generateMetadata({ params }: PartnerPageProps) {
-    const supabase = await createServerClient();
+    const supabase = await createSupabaseServerClient();
     const { data: partner } = await supabase
         .from('profiles')
         .select('company_name, description')
@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: PartnerPageProps) {
 
 // 2. Page Component
 export default async function PartnerDetailPage({ params }: PartnerPageProps) {
-    const supabase = await createServerClient();
+    const supabase = await createSupabaseServerClient();
 
     // Fetch Partner and their products
     const { data: partner, error } = await supabase
