@@ -17,7 +17,7 @@ export default async function PartnerDashboardPage() {
 
     // 1. Fetch Products Count
     const { count: productsCount } = await supabase
-        .from('products')
+        .from('partner_products')
         .select('*', { count: 'exact', head: true })
         .eq('partner_id', partnerId);
 
@@ -118,10 +118,10 @@ export default async function PartnerDashboardPage() {
                                             <td className="px-6 py-4 font-bold text-slate-900">{formatCurrency(order.total_amount)}</td>
                                             <td className="px-6 py-4">
                                                 <span className={`px-2 py-1 rounded-full text-xs font-bold uppercase ${order.status === 'pending' ? 'bg-blue-100 text-blue-700' :
-                                                        order.status === 'confirmed' ? 'bg-yellow-100 text-yellow-700' :
-                                                            order.status === 'shipped' ? 'bg-purple-100 text-purple-700' :
-                                                                order.status === 'delivered' ? 'bg-green-100 text-green-700' :
-                                                                    'bg-slate-100 text-slate-500'
+                                                    order.status === 'confirmed' ? 'bg-yellow-100 text-yellow-700' :
+                                                        order.status === 'shipped' ? 'bg-purple-100 text-purple-700' :
+                                                            order.status === 'delivered' ? 'bg-green-100 text-green-700' :
+                                                                'bg-slate-100 text-slate-500'
                                                     }`}>
                                                     {order.status}
                                                 </span>

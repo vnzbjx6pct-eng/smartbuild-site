@@ -154,7 +154,7 @@ export async function createProduct(formData: FormData): Promise<ActionResponse<
     if (sku) {
         // Check uniqueness for this partner
         const { data: existing } = await supabase
-            .from('products')
+            .from('partner_products')
             .select('id')
             .eq('partner_id', session.user.id)
             .eq('sku', sku)
@@ -180,7 +180,7 @@ export async function createProduct(formData: FormData): Promise<ActionResponse<
     };
 
     const { data, error } = await supabase
-        .from('products')
+        .from('partner_products')
         .insert(rawData)
         .select()
         .single();
@@ -223,7 +223,7 @@ export async function updateProduct(productId: string, formData: FormData): Prom
     if (formData.has('delivery_days')) updates.delivery_days = parseInt(formData.get('delivery_days') as string);
 
     const { data, error } = await supabase
-        .from('products')
+        .from('partner_products')
         .update(updates)
         .eq('id', productId)
         .eq('partner_id', session.user.id) // Ensure ownership
@@ -244,7 +244,7 @@ export async function deleteProduct(productId: string): Promise<ActionResponse<v
     if (!session?.user) return { success: false, error: "Unauthorized" };
 
     const { error } = await supabase
-        .from('products')
+        .from('partner_products')
         .delete()
         .eq('id', productId)
         .eq('partner_id', session.user.id);
@@ -263,7 +263,7 @@ export async function getPartnerProducts(): Promise<ActionResponse<Product[]>> {
     if (!session?.user) return { success: false, error: "Unauthorized" };
 
     const { data, error } = await supabase
-        .from('products')
+        .from('partner_products')
         .select('*')
         .eq('partner_id', session.user.id)
         .order('created_at', { ascending: false });
@@ -303,7 +303,7 @@ export async function savePartnerProducts(products: PartnerProductDraft[]): Prom
     }));
 
     const { error } = await supabase
-        .from('products')
+        .from('partner_products')
         .insert(rows);
 
     if (error) {
