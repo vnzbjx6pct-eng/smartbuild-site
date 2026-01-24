@@ -5,6 +5,24 @@ import type { Metadata } from 'next';
 
 export const revalidate = 60;
 
+type PartnerOffer = {
+    id: string;
+    name?: string | null;
+    product_id?: string | null;
+    price: number | null;
+    stock: number | null;
+    unit: string | null;
+    sku?: string | null;
+    ean?: string | null;
+    store_id?: string | null;
+    store_name?: string | null;
+    store?: {
+        name?: string | null;
+        brand_name?: string | null;
+        city?: string | null;
+    } | null;
+};
+
 export async function generateMetadata({
     params
 }: {
@@ -55,7 +73,77 @@ export default async function ProductDetailPage({
         notFound();
     }
 
-    // 2. Fetch Similar Products
+    // 2. Fetch Partner Offers for Comparison
+    let offersQuery = supabase
+        .from("offers")
+        .select("id, name, product_id, price, stock, unit, sku, ean, store_id, store_name");
+
+    const orMatches: string[] = [];
+    if (product.sku) orMatches.push(`sku.eq.${product.sku}`);
+    if (product.ean) orMatches.push(`ean.eq.${product.ean}`);
+
+    offersQuery = orMatches.length > 0
+        ? offersQuery.or(`product_id.eq.${product.id},${orMatches.join(",")}`)
+        : offersQuery.eq("product_id", product.id);
+
+    const { data: partnerOffers } = await offersQuery;
+
+    const offerStoreIds = Array.from(
+        new Set((partnerOffers || [])
+            .map((offer: any) => offer?.store_id)
+            .filter((id: string | null | undefined): id is string => Boolean(id)))
+    );
+
+    let storeMap = new Map<string, { name?: string | null; brand_name?: string | null; city?: string | null }>();
+    if (offerStoreIds.length > 0) {
+        const { data: stores, error: storesError } = await supabase
+            .from("stores")
+            .select("id, name, brand_name, city")
+            .in("id", offerStoreIds);
+
+        if (!storesError) {
+            storeMap = new Map((stores || []).map((store: any) => [store.id, store]));
+        }
+    }
+
+    const normalizeOffer = (offer: PartnerOffer): PartnerOffer => {
+        const normalizedStock = offer.stock === null || offer.stock === undefined ? null : Number(offer.stock);
+        const safeStock = Number.isFinite(normalizedStock) ? normalizedStock : null;
+        const normalizedPrice = Number(offer.price);
+        const safePrice = Number.isFinite(normalizedPrice) && normalizedPrice > 0 ? normalizedPrice : null;
+        const store = offer.store_id ? storeMap.get(offer.store_id) : null;
+        return {
+            ...offer,
+            price: safePrice,
+            stock: safeStock,
+            store
+        };
+    };
+    const offers: PartnerOffer[] = (partnerOffers || []).map(normalizeOffer);
+
+    const pricedOffers = offers.filter((offer) => typeof offer.price === "number" && offer.price > 0);
+
+    const sortedByBest = [...pricedOffers].sort((a, b) => {
+        if ((a.price ?? 0) !== (b.price ?? 0)) return (a.price ?? 0) - (b.price ?? 0);
+        const aStock = typeof a.stock === 'number' ? a.stock : -1;
+        const bStock = typeof b.stock === 'number' ? b.stock : -1;
+        return bStock - aStock;
+    });
+
+    const bestOffer = sortedByBest[0] || null;
+
+    const prices = pricedOffers.map((offer) => Number(offer.price)).filter((price) => Number.isFinite(price) && price > 0);
+    const minPrice = prices.length > 0 ? Math.min(...prices) : null;
+    const maxPrice = prices.length > 0 ? Math.max(...prices) : null;
+    const avgPrice = prices.length > 0
+        ? Math.round((prices.reduce((sum, price) => sum + price, 0) / prices.length) * 100) / 100
+        : null;
+
+    const hasAnyAvailableStock = offers.some((offer) => offer.stock === null || offer.stock === undefined || offer.stock > 0);
+    const productStockIsAvailable = product?.stock === null || product?.stock === undefined || product?.stock !== 0;
+    const isAvailable = offers.length > 0 ? hasAnyAvailableStock : productStockIsAvailable;
+
+    // 3. Fetch Similar Products
     const { data: similarProducts } = await supabase
         .from('products')
         .select('id, name, price, image_url, category')
@@ -65,6 +153,8 @@ export default async function ProductDetailPage({
         .limit(4);
 
     // JSON-LD Structured Data
+    const bestPrice = bestOffer?.price ?? product.price;
+    const bestSeller = bestOffer?.store?.name || bestOffer?.store?.brand_name || bestOffer?.store_name || product.profiles?.company_name;
     const jsonLd = {
         '@context': 'https://schema.org',
         '@type': 'Product',
@@ -73,14 +163,14 @@ export default async function ProductDetailPage({
         image: product.image_url ? [product.image_url] : [],
         offers: {
             '@type': 'Offer',
-            price: product.price,
+            price: bestPrice,
             priceCurrency: 'EUR',
-            availability: product.stock > 0
+            availability: isAvailable
                 ? 'https://schema.org/InStock'
                 : 'https://schema.org/OutOfStock',
             seller: {
                 '@type': 'Organization',
-                name: product.profiles?.company_name
+                name: bestSeller
             }
         },
     };
@@ -93,6 +183,12 @@ export default async function ProductDetailPage({
             />
             <ProductDetailClient
                 product={product}
+                partnerOffers={offers}
+                bestOfferId={bestOffer?.id || null}
+                minPrice={minPrice}
+                maxPrice={maxPrice}
+                avgPrice={avgPrice}
+                isAvailable={isAvailable}
                 similarProducts={similarProducts || []}
             />
         </>

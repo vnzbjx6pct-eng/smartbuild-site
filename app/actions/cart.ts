@@ -2,44 +2,185 @@
 
 import { createSupabaseServerClient } from "@/app/lib/supabase/server";
 import { cookies } from "next/headers";
-import type { Cart, CartItem } from "@/app/types";
+import type { Cart, CartItem, Product } from "@/app/types";
 import { revalidatePath } from "next/cache";
 
-// Helper to get or create a session ID for guests
-async function getCartSessionId(): Promise<string> {
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get("cart_session");
+type CartActionResult = {
+    success: boolean;
+    error?: string;
+};
 
-    if (sessionCookie?.value) {
-        return sessionCookie.value;
+const logSupabaseError = (context: string, error: { code?: string | null; message?: string | null } | null) => {
+    if (!error) return;
+    console.error(`[cart] ${context}`, {
+        code: error.code ?? undefined,
+        message: error.message ?? undefined
+    });
+};
+
+const CART_SESSION_COOKIE = "sb_cart_session_id";
+const CART_SESSION_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
+
+type CartOwner = { userId?: string; sessionId?: string };
+
+const getCartOwner = async (ensureSession: boolean, supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>): Promise<CartOwner> => {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError) logSupabaseError("get user", userError);
+
+    if (user?.id) {
+        return { userId: user.id };
     }
 
-    const newSessionId = crypto.randomUUID();
-    cookieStore.set("cart_session", newSessionId, {
-        path: "/",
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 60 * 60 * 24 * 30 // 30 days
-    });
+    const cookieStore = await cookies();
+    let sessionId = cookieStore.get(CART_SESSION_COOKIE)?.value;
 
-    return newSessionId;
-}
+    if (!sessionId && ensureSession) {
+        sessionId = crypto.randomUUID();
+        cookieStore.set(CART_SESSION_COOKIE, sessionId, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: CART_SESSION_MAX_AGE,
+            path: "/",
+        });
+    }
+
+    return sessionId ? { sessionId } : {};
+};
 
 // Fetch the current cart
 export async function getCart(): Promise<Cart> {
     const supabase = await createSupabaseServerClient();
-    const sessionId = await getCartSessionId();
+    const cartOwner = await getCartOwner(false, supabase);
+    if (!cartOwner.userId && !cartOwner.sessionId) {
+        return { items: [], total: 0, itemsCount: 0 };
+    }
 
-    // Check if user is logged in
-    const { data: { user } } = await supabase.auth.getUser();
+    const baseQuery = supabase
+        .from("cart_items")
+        .select("offer_id, quantity");
 
-    let query = supabase
-        .from('cart_items')
+    const { data: items, error } = cartOwner.userId
+        ? await baseQuery.eq("user_id", cartOwner.userId)
+        : await baseQuery.eq("session_id", cartOwner.sessionId);
+
+    if (error) {
+        logSupabaseError("fetch cart items", error);
+        return { items: [], total: 0, itemsCount: 0 };
+    }
+
+    if (!items || items.length === 0) {
+        return { items: [], total: 0, itemsCount: 0 };
+    }
+
+    const offerIds = Array.from(new Set(items.map((item) => item.offer_id).filter(Boolean)));
+    if (offerIds.length === 0) {
+        return { items: [], total: 0, itemsCount: 0 };
+    }
+
+    let offers: any[] | null = null;
+    let offersError: { code?: string | null; message?: string | null } | null = null;
+
+    const offersWithStore = await supabase
+        .from("offers")
         .select(`
             id,
             product_id,
-            quantity,
-            product:products (
+            price,
+            stock,
+            unit,
+            name,
+            image_url,
+            store_id,
+            store_name,
+            stores (
+                name,
+                brand_name,
+                city
+            )
+        `)
+        .in("id", offerIds);
+
+    if (offersWithStore.error) {
+        const fallbackOffers = await supabase
+            .from("offers")
+            .select("id, product_id, price, stock, unit, name, image_url, store_id, store_name")
+            .in("id", offerIds);
+        offers = fallbackOffers.data ?? null;
+        offersError = fallbackOffers.error ?? null;
+    } else {
+        offers = offersWithStore.data ?? null;
+    }
+
+    if (offersError) {
+        logSupabaseError("fetch offers", offersError);
+        const fallbackItems: CartItem[] = items.map((item) => ({
+            id: item.offer_id,
+            offer_id: item.offer_id,
+            product_id: item.offer_id,
+            quantity: item.quantity,
+            product: {
+                id: item.offer_id,
+                name: "Toode",
+                description: "",
+                price: 0,
+                category: "",
+                image_url: null,
+                stock: 0,
+                unit: "",
+                is_active: true,
+                partner_id: "",
+                created_at: ""
+            }
+        }));
+        return {
+            items: fallbackItems,
+            total: fallbackItems.reduce((sum, item) => sum + (Number(item.product.price) * item.quantity), 0),
+            itemsCount: fallbackItems.reduce((sum, item) => sum + item.quantity, 0)
+        };
+    }
+
+    if (!offers || offers.length === 0) {
+        const fallbackItems: CartItem[] = items.map((item) => ({
+            id: item.offer_id,
+            offer_id: item.offer_id,
+            product_id: item.offer_id,
+            quantity: item.quantity,
+            product: {
+                id: item.offer_id,
+                name: "Toode",
+                description: "",
+                price: 0,
+                category: "",
+                image_url: null,
+                stock: 0,
+                unit: "",
+                is_active: true,
+                partner_id: "",
+                created_at: ""
+            }
+        }));
+        return {
+            items: fallbackItems,
+            total: fallbackItems.reduce((sum, item) => sum + (Number(item.product.price) * item.quantity), 0),
+            itemsCount: fallbackItems.reduce((sum, item) => sum + item.quantity, 0)
+        };
+    }
+
+    const offerMap = new Map((offers ?? []).map((offer) => [offer.id, offer]));
+    const productIds = Array.from(
+        new Set(
+            (offers ?? [])
+                .map((offer) => offer?.product_id)
+                .filter((id: string | null | undefined): id is string => Boolean(id))
+        )
+    );
+
+    let productMap = new Map<string, any>();
+    if (productIds.length > 0) {
+        const { data: products, error: productsError } = await supabase
+            .from("products")
+            .select(`
                 id,
                 name,
                 price,
@@ -48,124 +189,199 @@ export async function getCart(): Promise<Cart> {
                 category,
                 description,
                 unit,
-                partner_id
-            )
-        `);
+                is_active,
+                partner_id,
+                sku,
+                created_at,
+                profiles!products_partner_id_fkey (
+                    company_name,
+                    company_slug,
+                    city
+                )
+            `)
+            .in("id", productIds)
+            .eq("is_active", true);
 
-    if (user) {
-        query = query.eq('user_id', user.id);
-    } else {
-        query = query.eq('session_id', sessionId).is('user_id', null);
+        if (productsError) {
+            logSupabaseError("fetch products for cart", productsError);
+        } else {
+            productMap = new Map((products ?? []).map((product) => [product.id, product]));
+        }
     }
 
-    const { data: items, error } = await query;
+    const cartItems: CartItem[] = items
+        .map((item) => {
+            const offer = offerMap.get(item.offer_id);
+            if (!offer) return null;
 
-    if (error) {
-        console.error("Error fetching cart:", error);
-        return { items: [], total: 0, itemsCount: 0 };
-    }
+            const productId = offer?.product_id || "";
+            const baseProduct = productMap.get(productId);
+            const offerPrice = Number(offer?.price ?? baseProduct?.price ?? 0);
+            const offerUnit = offer?.unit ?? baseProduct?.unit ?? "";
+            const offerStock = typeof offer?.stock === "number" ? offer.stock : baseProduct?.stock ?? 0;
 
-    // Process items to match CartItem interface (handling Supabase join structure)
-    // @ts-expect-error - Supabase types join handling
-    const cartItems: CartItem[] = items.map(item => ({
-        id: item.id,
-        product_id: item.product_id,
-        quantity: item.quantity,
-        product: item.product
-    }));
+            const fallbackProduct: Product = {
+                id: productId || offer.id,
+                name: offer?.name || "Unknown",
+                description: baseProduct?.description || "",
+                price: offerPrice,
+                category: baseProduct?.category || "",
+                image_url: offer?.image_url ?? null,
+                stock: offerStock,
+                unit: offerUnit,
+                is_active: true,
+                partner_id: baseProduct?.partner_id || "",
+                sku: baseProduct?.sku,
+                created_at: baseProduct?.created_at || "",
+                profiles: baseProduct?.profiles
+            };
 
-    const total = cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+            return {
+                id: item.offer_id,
+                offer_id: item.offer_id,
+                product_id: productId || offer.id,
+                quantity: item.quantity,
+                product: baseProduct
+                    ? {
+                        ...baseProduct,
+                        price: offerPrice,
+                        unit: offerUnit,
+                        stock: offerStock
+                    }
+                    : fallbackProduct
+            };
+        })
+        .filter((item): item is CartItem => item !== null);
+
+    const total = cartItems.reduce((sum, item) => sum + (Number(item.product.price) * item.quantity), 0);
     const itemsCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
     return { items: cartItems, total, itemsCount };
 }
 
-export async function addToCart(productId: string, quantity: number = 1) {
+export async function addToCart(offerId: string, quantity: number = 1): Promise<CartActionResult> {
     const supabase = await createSupabaseServerClient();
-    const sessionId = await getCartSessionId();
-    const { data: { user } } = await supabase.auth.getUser();
+    const cartOwner = await getCartOwner(true, supabase);
+    if (!cartOwner.userId && !cartOwner.sessionId) {
+        return { success: false, error: "ADD_TO_CART_FAILED" };
+    }
+
+    if (!offerId) {
+        return { success: false, error: "INVALID_OFFER" };
+    }
+
+    const safeQuantity = Number.isFinite(quantity) && quantity > 0 ? Math.floor(quantity) : 1;
 
     // Check if item exists
-    let existingQuery = supabase.from('cart_items').select('id, quantity');
+    const { data: existingItems, error: existingError } = await supabase
+        .from("cart_items")
+        .select("quantity")
+        .eq("offer_id", offerId)
+        .eq(cartOwner.userId ? "user_id" : "session_id", cartOwner.userId ?? cartOwner.sessionId)
+        .limit(1);
 
-    if (user) {
-        existingQuery = existingQuery.eq('user_id', user.id).eq('product_id', productId);
-    } else {
-        existingQuery = existingQuery.eq('session_id', sessionId).is('user_id', null).eq('product_id', productId);
+    if (existingError) {
+        logSupabaseError("check existing cart item", existingError);
+        return { success: false, error: "ADD_TO_CART_FAILED" };
     }
 
-    const { data: existingItems } = await existingQuery.single();
+    const existingItem = existingItems?.[0];
+    if (existingItem) {
+        const existingQty = Number(existingItem.quantity ?? 0);
+        const { error: updateError } = await supabase
+            .from("cart_items")
+            .update({ quantity: existingQty + safeQuantity })
+            .eq("offer_id", offerId)
+            .eq(cartOwner.userId ? "user_id" : "session_id", cartOwner.userId ?? cartOwner.sessionId);
 
-    if (existingItems) {
-        // Update quantity
-        const { error } = await supabase
-            .from('cart_items')
-            .update({ quantity: existingItems.quantity + quantity })
-            .eq('id', existingItems.id);
-
-        if (error) throw new Error(error.message);
+        if (updateError) {
+            logSupabaseError("update cart quantity", updateError);
+            return { success: false, error: "ADD_TO_CART_FAILED" };
+        }
     } else {
-        // Insert new
-        const { error } = await supabase
-            .from('cart_items')
+        const { error: insertError } = await supabase
+            .from("cart_items")
             .insert({
-                user_id: user?.id || null,
-                session_id: user ? null : sessionId,
-                product_id: productId,
-                quantity: quantity
+                user_id: cartOwner.userId ?? null,
+                session_id: cartOwner.sessionId ?? null,
+                offer_id: offerId,
+                quantity: safeQuantity
             });
 
-        if (error) throw new Error(error.message);
+        if (insertError) {
+            logSupabaseError("insert cart item", insertError);
+            return { success: false, error: "ADD_TO_CART_FAILED" };
+        }
     }
 
     revalidatePath('/cart');
-    revalidatePath('/products'); // Revalidate products if stock display depends on valid cart (not implementing stock deduction yet)
     return { success: true };
 }
 
-export async function removeFromCart(itemId: string) {
+export async function removeFromCart(offerId: string): Promise<CartActionResult> {
     const supabase = await createSupabaseServerClient();
-    const { error } = await supabase.from('cart_items').delete().eq('id', itemId);
-
-    if (error) throw new Error(error.message);
-
-    revalidatePath('/cart');
-    return { success: true };
-}
-
-export async function updateCartItem(itemId: string, quantity: number) {
-    const supabase = await createSupabaseServerClient();
-
-    if (quantity <= 0) {
-        return removeFromCart(itemId);
+    const cartOwner = await getCartOwner(false, supabase);
+    if (!cartOwner.userId && !cartOwner.sessionId) {
+        return { success: true };
     }
 
     const { error } = await supabase
-        .from('cart_items')
-        .update({ quantity })
-        .eq('id', itemId);
+        .from("cart_items")
+        .delete()
+        .eq("offer_id", offerId)
+        .eq(cartOwner.userId ? "user_id" : "session_id", cartOwner.userId ?? cartOwner.sessionId);
 
-    if (error) throw new Error(error.message);
+    if (error) {
+        logSupabaseError("remove cart item", error);
+        return { success: false, error: "REMOVE_FROM_CART_FAILED" };
+    }
 
     revalidatePath('/cart');
     return { success: true };
 }
 
-export async function clearCart() {
+export async function updateCartItemQuantity(offerId: string, quantity: number): Promise<CartActionResult> {
     const supabase = await createSupabaseServerClient();
-    const sessionId = await getCartSessionId();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    let query = supabase.from('cart_items').delete();
-
-    if (user) {
-        query = query.eq('user_id', user.id);
-    } else {
-        query = query.eq('session_id', sessionId);
+    const cartOwner = await getCartOwner(false, supabase);
+    if (!cartOwner.userId && !cartOwner.sessionId) {
+        return { success: true };
     }
 
-    const { error } = await query;
-    if (error) throw new Error(error.message);
+    const safeQuantity = Number.isFinite(quantity) ? Math.floor(quantity) : 0;
+    if (safeQuantity <= 0) {
+        return removeFromCart(offerId);
+    }
+
+    const { error } = await supabase
+        .from("cart_items")
+        .update({ quantity: safeQuantity })
+        .eq("offer_id", offerId)
+        .eq(cartOwner.userId ? "user_id" : "session_id", cartOwner.userId ?? cartOwner.sessionId);
+
+    if (error) {
+        logSupabaseError("update cart item quantity", error);
+        return { success: false, error: "UPDATE_CART_FAILED" };
+    }
+
+    revalidatePath('/cart');
+    return { success: true };
+}
+
+export async function clearCart(): Promise<CartActionResult> {
+    const supabase = await createSupabaseServerClient();
+    const cartOwner = await getCartOwner(false, supabase);
+    if (!cartOwner.userId && !cartOwner.sessionId) {
+        return { success: true };
+    }
+
+    const { error } = await supabase
+        .from("cart_items")
+        .delete()
+        .eq(cartOwner.userId ? "user_id" : "session_id", cartOwner.userId ?? cartOwner.sessionId);
+    if (error) {
+        logSupabaseError("clear cart", error);
+        return { success: false, error: "CLEAR_CART_FAILED" };
+    }
 
     revalidatePath('/cart');
     return { success: true };
