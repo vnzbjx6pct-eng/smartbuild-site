@@ -1,8 +1,8 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback, useOptimistic } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { Cart, CartItem } from '@/app/types';
-import { getCart, addToCart as addToCartAction, removeFromCart as removeFromCartAction, updateCartItem as updateCartItemAction, clearCart as clearCartAction } from '@/app/actions/cart';
+import { getCart, addToCart as addToCartAction, removeFromCart as removeFromCartAction, updateCartItemQuantity as updateCartItemQuantityAction, clearCart as clearCartAction } from '@/app/actions/cart';
 import { toast } from 'react-hot-toast';
 
 interface CartContextType {
@@ -10,9 +10,18 @@ interface CartContextType {
     isLoading: boolean;
     isSidebarOpen: boolean;
     toggleSidebar: () => void;
-    addToCart: (productId: string, quantity?: number) => Promise<void>;
-    removeFromCart: (itemId: string) => Promise<void>;
-    updateQuantity: (itemId: string, quantity: number) => Promise<void>;
+    addToCart: (offerId: string, quantity?: number, options?: {
+        silent?: boolean;
+        debug?: {
+            bestOfferId?: string | null;
+            bestOfferPrice?: number | null;
+            bestOfferStock?: number | null;
+            offersLength?: number;
+            isAvailable?: boolean;
+        };
+    }) => Promise<{ success: boolean; error?: string }>;
+    removeFromCart: (offerId: string) => Promise<void>;
+    updateQuantity: (offerId: string, quantity: number) => Promise<void>;
     clearCart: () => Promise<void>;
 }
 
@@ -40,51 +49,99 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
 
-    const addToCart = async (productId: string, quantity: number = 1) => {
+    const addToCart = async (
+        offerId: string,
+        quantity: number = 1,
+        options?: {
+            silent?: boolean;
+            debug?: {
+                bestOfferId?: string | null;
+                bestOfferPrice?: number | null;
+                bestOfferStock?: number | null;
+                offersLength?: number;
+                isAvailable?: boolean;
+            };
+        }
+    ) => {
         try {
-            await addToCartAction(productId, quantity);
+            const result = await addToCartAction(offerId, quantity, options?.debug);
+            if (!result.success) {
+                if (!options?.silent) {
+                    if (result.error === "LOGIN_REQUIRED") {
+                        toast.error("Logi sisse, et lisada ostukorvi.");
+                    } else {
+                        toast.error("Something went wrong.");
+                    }
+                }
+                return result;
+            }
+
             await refreshCart();
             setIsSidebarOpen(true); // Open sidebar on add
-            toast.success("Toode lisatud korvi!");
+            if (!options?.silent) {
+                toast.success("Lisatud korvi");
+            }
+            return result;
         } catch (error) {
             console.error(error);
-            toast.error("Viga toote lisamisel korvi.");
+            if (!options?.silent) {
+                toast.error("Something went wrong.");
+            }
+            return { success: false, error: "ADD_TO_CART_FAILED" };
         }
     };
 
-    const removeFromCart = async (itemId: string) => {
+    const removeFromCart = async (offerId: string) => {
         try {
             // Optimistic update
             if (cart) {
-                const updatedItems = cart.items.filter(item => item.id !== itemId);
+                const updatedItems = cart.items.filter(item => item.offer_id !== offerId);
                 setCart({ ...cart, items: updatedItems, total: calculateTotal(updatedItems), itemsCount: calculateCount(updatedItems) });
             }
 
-            await removeFromCartAction(itemId);
+            const result = await removeFromCartAction(offerId);
+            if (!result.success) {
+                if (result.error === "LOGIN_REQUIRED") {
+                    toast.error("Logi sisse, et muuta ostukorvi.");
+                } else {
+                    toast.error("Something went wrong.");
+                }
+                refreshCart();
+                return;
+            }
             await refreshCart();
             toast.success("Toode eemaldatud.");
         } catch (error) {
             console.error(error);
-            toast.error("Viga toote eemaldamisel.");
+            toast.error("Something went wrong.");
             refreshCart(); // Revert
         }
     };
 
-    const updateQuantity = async (itemId: string, quantity: number) => {
+    const updateQuantity = async (offerId: string, quantity: number) => {
         try {
             // Optimistic update
             if (cart) {
                 const updatedItems = cart.items.map(item =>
-                    item.id === itemId ? { ...item, quantity } : item
+                    item.offer_id === offerId ? { ...item, quantity } : item
                 );
                 setCart({ ...cart, items: updatedItems, total: calculateTotal(updatedItems), itemsCount: calculateCount(updatedItems) });
             }
 
-            await updateCartItemAction(itemId, quantity);
+            const result = await updateCartItemQuantityAction(offerId, quantity);
+            if (!result.success) {
+                if (result.error === "LOGIN_REQUIRED") {
+                    toast.error("Logi sisse, et muuta ostukorvi.");
+                } else {
+                    toast.error("Something went wrong.");
+                }
+                refreshCart();
+                return;
+            }
             await refreshCart();
         } catch (error) {
             console.error(error);
-            toast.error("Viga koguse muutmisel.");
+            toast.error("Something went wrong.");
             refreshCart();
         }
     };
@@ -93,12 +150,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         if (confirm("Kas oled kindel, et soovid ostukorvi tühjendada?")) {
             try {
                 setCart({ items: [], total: 0, itemsCount: 0 }); // Optimistic
-                await clearCartAction();
+                const result = await clearCartAction();
+                if (!result.success) {
+                    if (result.error === "LOGIN_REQUIRED") {
+                        toast.error("Logi sisse, et muuta ostukorvi.");
+                    } else {
+                        toast.error("Something went wrong.");
+                    }
+                    return;
+                }
                 await refreshCart();
                 toast.success("Ostukorv tühjendatud.");
             } catch (error) {
                 console.error(error);
-                toast.error("Viga ostukorvi tühjendamisel.");
+                toast.error("Something went wrong.");
             }
         }
     };

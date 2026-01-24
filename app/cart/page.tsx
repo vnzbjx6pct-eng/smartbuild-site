@@ -67,9 +67,9 @@ export default function CartPage() {
                                                 <p className="text-slate-500 text-sm mb-4 line-clamp-2">{item.product.category}</p>
                                                 <div className="flex items-center gap-3">
                                                     <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Müüja:</span>
-                                                    {item.product.profiles && (
+                                                    {item.product?.profiles && (
                                                         <span className="text-sm font-medium text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full">
-                                                            {item.product.profiles.company_name}
+                                                            {item.product.profiles.company_name || "Tundmatu"}
                                                         </span>
                                                     )}
                                                 </div>
@@ -81,7 +81,7 @@ export default function CartPage() {
 
                                                 <div className="flex items-center bg-white border border-slate-200 rounded-lg">
                                                     <button
-                                                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                                    onClick={() => updateQuantity(item.offer_id, item.quantity - 1)}
                                                         className="px-3 py-1 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-l-lg transition-colors border-r border-slate-100"
                                                         disabled={item.quantity <= 1}
                                                     >
@@ -90,11 +90,11 @@ export default function CartPage() {
                                                     <input
                                                         type="number"
                                                         value={item.quantity}
-                                                        onChange={(e) => updateQuantity(item.id, parseInt(e.target.value) || 1)}
+                                                    onChange={(e) => updateQuantity(item.offer_id, parseInt(e.target.value) || 1)}
                                                         className="w-12 text-center py-1 text-sm font-medium focus:outline-none"
                                                     />
                                                     <button
-                                                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                                    onClick={() => updateQuantity(item.offer_id, item.quantity + 1)}
                                                         className="px-3 py-1 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-r-lg transition-colors border-l border-slate-100"
                                                     >
                                                         +
@@ -102,7 +102,7 @@ export default function CartPage() {
                                                 </div>
 
                                                 <button
-                                                    onClick={() => removeFromCart(item.id)}
+                                                    onClick={() => removeFromCart(item.offer_id)}
                                                     className="sm:hidden text-red-500 text-sm mt-2"
                                                 >
                                                     Eemalda
@@ -111,7 +111,7 @@ export default function CartPage() {
                                         </div>
 
                                         <button
-                                            onClick={() => removeFromCart(item.id)}
+                                            onClick={() => removeFromCart(item.offer_id)}
                                             className="hidden sm:block text-slate-300 hover:text-red-500 transition-colors p-2"
                                             title="Eemalda toode"
                                         >

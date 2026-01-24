@@ -86,7 +86,18 @@ export default async function ProductDetailPage({
         ? offersQuery.or(`product_id.eq.${product.id},${orMatches.join(",")}`)
         : offersQuery.eq("product_id", product.id);
 
-    const { data: partnerOffers } = await offersQuery;
+    const { data: partnerOffers, error: offersError } = await offersQuery;
+    const offersErrorMessage = offersError
+        ? "Partnerite pakkumiste laadimine ebaõnnestus. Proovi mõne hetke pärast uuesti."
+        : null;
+
+    if (offersError) {
+        console.error("[product] offers query failed", {
+            productId: product.id,
+            code: offersError.code ?? undefined,
+            message: offersError.message ?? undefined,
+        });
+    }
 
     const offerStoreIds = Array.from(
         new Set((partnerOffers || [])
@@ -123,8 +134,10 @@ export default async function ProductDetailPage({
 
     const pricedOffers = offers.filter((offer) => typeof offer.price === "number" && offer.price > 0);
 
-    const sortedByBest = [...pricedOffers].sort((a, b) => {
-        if ((a.price ?? 0) !== (b.price ?? 0)) return (a.price ?? 0) - (b.price ?? 0);
+    const sortedByBest = [...offers].sort((a, b) => {
+        const aPrice = typeof a.price === "number" ? a.price : Number.POSITIVE_INFINITY;
+        const bPrice = typeof b.price === "number" ? b.price : Number.POSITIVE_INFINITY;
+        if (aPrice !== bPrice) return aPrice - bPrice;
         const aStock = typeof a.stock === 'number' ? a.stock : -1;
         const bStock = typeof b.stock === 'number' ? b.stock : -1;
         return bStock - aStock;
@@ -142,6 +155,15 @@ export default async function ProductDetailPage({
     const hasAnyAvailableStock = offers.some((offer) => offer.stock === null || offer.stock === undefined || offer.stock > 0);
     const productStockIsAvailable = product?.stock === null || product?.stock === undefined || product?.stock !== 0;
     const isAvailable = offers.length > 0 ? hasAnyAvailableStock : productStockIsAvailable;
+
+    console.log("[product] offer summary", {
+        productId: product.id,
+        offersLength: offers.length,
+        bestOffer: bestOffer
+            ? { id: bestOffer.id, price: bestOffer.price, stock: bestOffer.stock }
+            : null,
+        isAvailable,
+    });
 
     // 3. Fetch Similar Products
     const { data: similarProducts } = await supabase
@@ -189,6 +211,7 @@ export default async function ProductDetailPage({
                 maxPrice={maxPrice}
                 avgPrice={avgPrice}
                 isAvailable={isAvailable}
+                offersErrorMessage={offersErrorMessage}
                 similarProducts={similarProducts || []}
             />
         </>

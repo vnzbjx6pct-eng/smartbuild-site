@@ -11,6 +11,7 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
     // Determine image to show
     const imageUrl = product.image_url || product.image;
+    const companyName = product.profiles?.company_name?.trim() || "";
 
     return (
         <div className="bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full group">
@@ -30,11 +31,14 @@ export default function ProductCard({ product }: ProductCardProps) {
                 )}
 
                 {/* Partner Badge */}
-                {product.profiles?.company_name && (
+                {companyName && (
                     <div className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-md text-xs font-medium text-slate-600 shadow-sm">
-                        {product.profiles.company_name}
+                        {companyName}
                     </div>
                 )}
+                <span className="absolute top-2 right-2 bg-emerald-600 text-white text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full shadow-sm">
+                    Võrdle hindu
+                </span>
             </div>
 
             {/* Content */}
@@ -56,9 +60,13 @@ export default function ProductCard({ product }: ProductCardProps) {
                         </div>
                     </div>
 
-                    <button className="w-10 h-10 bg-slate-100 text-slate-900 rounded-lg flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-all shadow-sm">
+                    <Link
+                        href={`/products/${product.id}`}
+                        className="w-10 h-10 bg-slate-100 text-slate-900 rounded-lg flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
+                        aria-label="Vaata toodet"
+                    >
                         <ShoppingCart size={20} />
-                    </button>
+                    </Link>
                 </div>
             </div>
         </div>

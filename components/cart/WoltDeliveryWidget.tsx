@@ -56,7 +56,7 @@ export default function WoltDeliveryWidget({
     const normalizedItems: NormalizedCartItem[] = useMemo(() => {
         return items.map(item => ({
             ...item.product,
-            id: item.id, // Cart item ID
+            id: item.offer_id,
             productId: item.product_id,
             qty: item.quantity,
             name: item.product.name // explicit name

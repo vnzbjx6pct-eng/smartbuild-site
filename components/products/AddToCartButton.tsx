@@ -7,13 +7,16 @@ import { useLanguage } from "@/components/i18n/LanguageProvider";
 
 import type { Product } from "@/app/lib/types";
 
-export default function AddToCartButton({ product }: { product: Product }) {
+export default function AddToCartButton({ product, offerId }: { product: Product; offerId?: string | null }) {
     const { addToCart } = useCart();
     const { t } = useLanguage();
     const [added, setAdded] = useState(false);
 
     const handleAdd = () => {
-        addToCart(product.id, 1);
+        if (!offerId) {
+            return;
+        }
+        addToCart(offerId, 1);
         track("add_to_cart_success", {
             product_id: product.id,
             product_name: product.name,

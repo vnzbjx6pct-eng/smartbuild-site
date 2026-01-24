@@ -1,7 +1,6 @@
 "use server";
 
 import { createSupabaseServerClient } from "@/app/lib/supabase/server";
-import { cookies } from "next/headers";
 import type { Cart, CartItem, Product } from "@/app/types";
 import { revalidatePath } from "next/cache";
 
@@ -18,51 +17,26 @@ const logSupabaseError = (context: string, error: { code?: string | null; messag
     });
 };
 
-const CART_SESSION_COOKIE = "sb_cart_session_id";
-const CART_SESSION_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
-
-type CartOwner = { userId?: string; sessionId?: string };
-
-const getCartOwner = async (ensureSession: boolean, supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>): Promise<CartOwner> => {
+const getUserId = async (
+    supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>
+): Promise<string | null> => {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError) logSupabaseError("get user", userError);
-
-    if (user?.id) {
-        return { userId: user.id };
-    }
-
-    const cookieStore = await cookies();
-    let sessionId = cookieStore.get(CART_SESSION_COOKIE)?.value;
-
-    if (!sessionId && ensureSession) {
-        sessionId = crypto.randomUUID();
-        cookieStore.set(CART_SESSION_COOKIE, sessionId, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            maxAge: CART_SESSION_MAX_AGE,
-            path: "/",
-        });
-    }
-
-    return sessionId ? { sessionId } : {};
+    return user?.id ?? null;
 };
 
 // Fetch the current cart
 export async function getCart(): Promise<Cart> {
     const supabase = await createSupabaseServerClient();
-    const cartOwner = await getCartOwner(false, supabase);
-    if (!cartOwner.userId && !cartOwner.sessionId) {
+    const userId = await getUserId(supabase);
+    if (!userId) {
         return { items: [], total: 0, itemsCount: 0 };
     }
 
-    const baseQuery = supabase
+    const { data: items, error } = await supabase
         .from("cart_items")
-        .select("offer_id, quantity");
-
-    const { data: items, error } = cartOwner.userId
-        ? await baseQuery.eq("user_id", cartOwner.userId)
-        : await baseQuery.eq("session_id", cartOwner.sessionId);
+        .select("offer_id, quantity")
+        .eq("user_id", userId);
 
     if (error) {
         logSupabaseError("fetch cart items", error);
@@ -259,15 +233,30 @@ export async function getCart(): Promise<Cart> {
     return { items: cartItems, total, itemsCount };
 }
 
-export async function addToCart(offerId: string, quantity: number = 1): Promise<CartActionResult> {
-    const supabase = await createSupabaseServerClient();
-    const cartOwner = await getCartOwner(true, supabase);
-    if (!cartOwner.userId && !cartOwner.sessionId) {
-        return { success: false, error: "ADD_TO_CART_FAILED" };
+export async function addToCart(
+    offerId: string,
+    quantity: number = 1,
+    debug?: {
+        bestOfferId?: string | null;
+        bestOfferPrice?: number | null;
+        bestOfferStock?: number | null;
+        offersLength?: number;
+        isAvailable?: boolean;
     }
+): Promise<CartActionResult> {
+    const supabase = await createSupabaseServerClient();
+    const userId = await getUserId(supabase);
 
     if (!offerId) {
         return { success: false, error: "INVALID_OFFER" };
+    }
+
+    if (!userId) {
+        return { success: false, error: "LOGIN_REQUIRED" };
+    }
+
+    if (debug) {
+        console.log("[cart] add debug", debug);
     }
 
     const safeQuantity = Number.isFinite(quantity) && quantity > 0 ? Math.floor(quantity) : 1;
@@ -277,7 +266,7 @@ export async function addToCart(offerId: string, quantity: number = 1): Promise<
         .from("cart_items")
         .select("quantity")
         .eq("offer_id", offerId)
-        .eq(cartOwner.userId ? "user_id" : "session_id", cartOwner.userId ?? cartOwner.sessionId)
+        .eq("user_id", userId)
         .limit(1);
 
     if (existingError) {
@@ -292,7 +281,7 @@ export async function addToCart(offerId: string, quantity: number = 1): Promise<
             .from("cart_items")
             .update({ quantity: existingQty + safeQuantity })
             .eq("offer_id", offerId)
-            .eq(cartOwner.userId ? "user_id" : "session_id", cartOwner.userId ?? cartOwner.sessionId);
+            .eq("user_id", userId);
 
         if (updateError) {
             logSupabaseError("update cart quantity", updateError);
@@ -302,8 +291,7 @@ export async function addToCart(offerId: string, quantity: number = 1): Promise<
         const { error: insertError } = await supabase
             .from("cart_items")
             .insert({
-                user_id: cartOwner.userId ?? null,
-                session_id: cartOwner.sessionId ?? null,
+                user_id: userId,
                 offer_id: offerId,
                 quantity: safeQuantity
             });
@@ -320,16 +308,16 @@ export async function addToCart(offerId: string, quantity: number = 1): Promise<
 
 export async function removeFromCart(offerId: string): Promise<CartActionResult> {
     const supabase = await createSupabaseServerClient();
-    const cartOwner = await getCartOwner(false, supabase);
-    if (!cartOwner.userId && !cartOwner.sessionId) {
-        return { success: true };
+    const userId = await getUserId(supabase);
+    if (!userId) {
+        return { success: false, error: "LOGIN_REQUIRED" };
     }
 
     const { error } = await supabase
         .from("cart_items")
         .delete()
         .eq("offer_id", offerId)
-        .eq(cartOwner.userId ? "user_id" : "session_id", cartOwner.userId ?? cartOwner.sessionId);
+        .eq("user_id", userId);
 
     if (error) {
         logSupabaseError("remove cart item", error);
@@ -342,9 +330,9 @@ export async function removeFromCart(offerId: string): Promise<CartActionResult>
 
 export async function updateCartItemQuantity(offerId: string, quantity: number): Promise<CartActionResult> {
     const supabase = await createSupabaseServerClient();
-    const cartOwner = await getCartOwner(false, supabase);
-    if (!cartOwner.userId && !cartOwner.sessionId) {
-        return { success: true };
+    const userId = await getUserId(supabase);
+    if (!userId) {
+        return { success: false, error: "LOGIN_REQUIRED" };
     }
 
     const safeQuantity = Number.isFinite(quantity) ? Math.floor(quantity) : 0;
@@ -356,7 +344,7 @@ export async function updateCartItemQuantity(offerId: string, quantity: number):
         .from("cart_items")
         .update({ quantity: safeQuantity })
         .eq("offer_id", offerId)
-        .eq(cartOwner.userId ? "user_id" : "session_id", cartOwner.userId ?? cartOwner.sessionId);
+        .eq("user_id", userId);
 
     if (error) {
         logSupabaseError("update cart item quantity", error);
@@ -369,15 +357,15 @@ export async function updateCartItemQuantity(offerId: string, quantity: number):
 
 export async function clearCart(): Promise<CartActionResult> {
     const supabase = await createSupabaseServerClient();
-    const cartOwner = await getCartOwner(false, supabase);
-    if (!cartOwner.userId && !cartOwner.sessionId) {
-        return { success: true };
+    const userId = await getUserId(supabase);
+    if (!userId) {
+        return { success: false, error: "LOGIN_REQUIRED" };
     }
 
     const { error } = await supabase
         .from("cart_items")
         .delete()
-        .eq(cartOwner.userId ? "user_id" : "session_id", cartOwner.userId ?? cartOwner.sessionId);
+        .eq("user_id", userId);
     if (error) {
         logSupabaseError("clear cart", error);
         return { success: false, error: "CLEAR_CART_FAILED" };

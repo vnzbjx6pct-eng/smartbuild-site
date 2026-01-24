@@ -93,7 +93,7 @@ export default function CartSidebar() {
                                     <div className="flex items-center justify-between mt-2">
                                         <div className="flex items-center gap-3 bg-white rounded-lg border border-slate-200 px-2 py-1">
                                             <button
-                                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                                onClick={() => updateQuantity(item.offer_id, item.quantity - 1)}
                                                 className="text-slate-400 hover:text-slate-600 disabled:opacity-30"
                                                 disabled={item.quantity <= 1}
                                             >
@@ -101,14 +101,14 @@ export default function CartSidebar() {
                                             </button>
                                             <span className="text-sm font-medium w-4 text-center">{item.quantity}</span>
                                             <button
-                                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                                onClick={() => updateQuantity(item.offer_id, item.quantity + 1)}
                                                 className="text-slate-400 hover:text-slate-600"
                                             >
                                                 <Plus size={14} />
                                             </button>
                                         </div>
                                         <button
-                                            onClick={() => removeFromCart(item.id)}
+                                            onClick={() => removeFromCart(item.offer_id)}
                                             className="text-red-400 hover:text-red-600 p-1.5 hover:bg-red-50 rounded-lg transition-colors"
                                         >
                                             <Trash2 size={16} />

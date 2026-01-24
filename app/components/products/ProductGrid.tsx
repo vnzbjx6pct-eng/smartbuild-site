@@ -8,8 +8,8 @@ interface ProductGridProps {
 export default function ProductGrid({ products }: ProductGridProps) {
     if (!products || products.length === 0) {
         return (
-            <div className="text-center py-12 bg-white rounded-xl border border-slate-200">
-                <p className="text-slate-500">Tooteid ei leitud.</p>
+            <div className="text-center py-12 bg-slate-800 rounded-xl border border-slate-700">
+                <p className="text-slate-300">Tooteid ei leitud.</p>
             </div>
         );
     }

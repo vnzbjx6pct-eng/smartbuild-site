@@ -43,6 +43,7 @@ export interface ProductFilterParams {
 
 export interface CartItem {
     id: string;
+    offer_id: string;
     product_id: string;
     quantity: number;
     product: Product; // We'll join this

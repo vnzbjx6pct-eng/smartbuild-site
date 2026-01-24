@@ -25,7 +25,7 @@ export default function Pagination({ currentPage, totalPages }: PaginationProps)
             <button
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage <= 1}
-                className="p-2 rounded-lg border border-slate-200 text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+                className="p-2 rounded-lg border border-slate-700 text-slate-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-800 transition-colors"
             >
                 <ChevronLeft size={20} />
             </button>
@@ -43,8 +43,8 @@ export default function Pagination({ currentPage, totalPages }: PaginationProps)
                                 key={page}
                                 onClick={() => handlePageChange(page)}
                                 className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${currentPage === page
-                                        ? "bg-slate-900 text-white"
-                                        : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
+                                        ? "bg-emerald-600 text-white"
+                                        : "bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-700"
                                     }`}
                             >
                                 {page}
@@ -54,7 +54,7 @@ export default function Pagination({ currentPage, totalPages }: PaginationProps)
                         page === currentPage - 2 ||
                         page === currentPage + 2
                     ) {
-                        return <span key={page} className="px-1 text-slate-400">...</span>;
+                        return <span key={page} className="px-1 text-slate-500">...</span>;
                     }
                     return null;
                 })}
@@ -63,7 +63,7 @@ export default function Pagination({ currentPage, totalPages }: PaginationProps)
             <button
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage >= totalPages}
-                className="p-2 rounded-lg border border-slate-200 text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+                className="p-2 rounded-lg border border-slate-700 text-slate-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-800 transition-colors"
             >
                 <ChevronRight size={20} />
             </button>
