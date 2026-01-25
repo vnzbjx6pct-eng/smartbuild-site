@@ -7,14 +7,48 @@ import { revalidatePath } from "next/cache";
 type CartActionResult = {
     success: boolean;
     error?: string;
+    debug?: {
+        offerId?: string | null;
+        userId?: string | null;
+        step?: string;
+        supabaseError?: {
+            code?: string | null;
+            message?: string | null;
+            details?: string | null;
+            hint?: string | null;
+        };
+        offerSnapshot?: {
+            price?: number | string | null;
+            unit_price?: number | string | null;
+            currency?: string | null;
+            unit?: string | null;
+        };
+    };
 };
 
-const logSupabaseError = (context: string, error: { code?: string | null; message?: string | null } | null) => {
+const logSupabaseError = (
+    context: string,
+    error: { code?: string | null; message?: string | null; details?: string | null; hint?: string | null } | null
+) => {
     if (!error) return;
     console.error(`[cart] ${context}`, {
         code: error.code ?? undefined,
-        message: error.message ?? undefined
+        message: error.message ?? undefined,
+        details: error.details ?? undefined,
+        hint: error.hint ?? undefined
     });
+};
+
+const buildSupabaseDebug = (
+    error: { code?: string | null; message?: string | null; details?: string | null; hint?: string | null } | null
+) => {
+    if (!error) return undefined;
+    return {
+        code: error.code ?? null,
+        message: error.message ?? null,
+        details: error.details ?? null,
+        hint: error.hint ?? null
+    };
 };
 
 const getUserId = async (
@@ -61,12 +95,12 @@ export async function getCart(): Promise<Cart> {
             id,
             product_id,
             price,
-            stock,
+            stock:stock_qty,
             unit,
             name,
             image_url,
             store_id,
-            store_name,
+            store_name:store,
             stores (
                 name,
                 brand_name,
@@ -78,7 +112,7 @@ export async function getCart(): Promise<Cart> {
     if (offersWithStore.error) {
         const fallbackOffers = await supabase
             .from("offers")
-            .select("id, product_id, price, stock, unit, name, image_url, store_id, store_name")
+            .select("id, product_id, price, stock:stock_qty, unit, store_id, store_name:store")
             .in("id", offerIds);
         offers = fallbackOffers.data ?? null;
         offersError = fallbackOffers.error ?? null;
@@ -196,11 +230,11 @@ export async function getCart(): Promise<Cart> {
 
             const fallbackProduct: Product = {
                 id: productId || offer.id,
-                name: offer?.name || "Unknown",
+                name: baseProduct?.name || "Toode",
                 description: baseProduct?.description || "",
                 price: offerPrice,
                 category: baseProduct?.category || "",
-                image_url: offer?.image_url ?? null,
+                image_url: baseProduct?.image_url ?? null,
                 stock: offerStock,
                 unit: offerUnit,
                 is_active: true,
@@ -244,66 +278,224 @@ export async function addToCart(
         isAvailable?: boolean;
     }
 ): Promise<CartActionResult> {
-    const supabase = await createSupabaseServerClient();
-    const userId = await getUserId(supabase);
+    let resolvedUserId: string | null = null;
+    try {
+        const isDev = process.env.NODE_ENV !== "production";
+        const supabase = await createSupabaseServerClient();
+        const userId = await getUserId(supabase);
+        resolvedUserId = userId;
 
-    if (!offerId) {
-        return { success: false, error: "INVALID_OFFER" };
-    }
+        console.log("[cart] addToCart start", { offerId, userId });
 
-    if (!userId) {
-        return { success: false, error: "LOGIN_REQUIRED" };
-    }
-
-    if (debug) {
-        console.log("[cart] add debug", debug);
-    }
-
-    const safeQuantity = Number.isFinite(quantity) && quantity > 0 ? Math.floor(quantity) : 1;
-
-    // Check if item exists
-    const { data: existingItems, error: existingError } = await supabase
-        .from("cart_items")
-        .select("quantity")
-        .eq("offer_id", offerId)
-        .eq("user_id", userId)
-        .limit(1);
-
-    if (existingError) {
-        logSupabaseError("check existing cart item", existingError);
-        return { success: false, error: "ADD_TO_CART_FAILED" };
-    }
-
-    const existingItem = existingItems?.[0];
-    if (existingItem) {
-        const existingQty = Number(existingItem.quantity ?? 0);
-        const { error: updateError } = await supabase
-            .from("cart_items")
-            .update({ quantity: existingQty + safeQuantity })
-            .eq("offer_id", offerId)
-            .eq("user_id", userId);
-
-        if (updateError) {
-            logSupabaseError("update cart quantity", updateError);
-            return { success: false, error: "ADD_TO_CART_FAILED" };
+        if (!offerId) {
+            const debugPayload = { offerId, userId, step: "invalid_offer" };
+            return {
+                success: false,
+                error: "INVALID_OFFER",
+                ...(isDev ? { debug: debugPayload } : {})
+            };
         }
-    } else {
-        const { error: insertError } = await supabase
+
+        if (!userId) {
+            const debugPayload = { offerId, userId, step: "login_required" };
+            return {
+                success: false,
+                error: "LOGIN_REQUIRED",
+                ...(isDev ? { debug: debugPayload } : {})
+            };
+        }
+
+        if (debug) {
+            console.log("[cart] add debug", debug);
+        }
+
+        const safeQuantity = Number.isFinite(quantity) && quantity > 0 ? Math.floor(quantity) : 1;
+
+        const { data: offer, error: offerError } = await supabase
+            .from("offers")
+            .select("id, price, unit_price, currency, unit, store_id, partner_id")
+            .eq("id", offerId)
+            .maybeSingle();
+
+        if (offerError) {
+            logSupabaseError("fetch offer for cart", offerError);
+            const debugPayload = {
+                offerId,
+                userId,
+                step: "select_offer",
+                supabaseError: buildSupabaseDebug(offerError)
+            };
+            return {
+                success: false,
+                error: "ADD_TO_CART_FAILED",
+                ...(isDev ? { debug: debugPayload } : {})
+            };
+        }
+
+        if (!offer) {
+            const debugPayload = { offerId, userId, step: "invalid_offer" };
+            return {
+                success: false,
+                error: "INVALID_OFFER",
+                ...(isDev ? { debug: debugPayload } : {})
+            };
+        }
+
+        const resolvedUnitPrice = offer.unit_price ?? offer.price ?? null;
+        const offerSnapshot = {
+            price: offer.price ?? null,
+            currency: offer.currency ?? null,
+            unit: offer.unit ?? null,
+            unit_price: resolvedUnitPrice
+        };
+
+        const missingFields: string[] = [];
+        if (resolvedUnitPrice === null || resolvedUnitPrice === undefined) missingFields.push("unit_price");
+        if (!offer.currency) missingFields.push("currency");
+        if (!offer.unit) missingFields.push("unit");
+        if (!offer.store_id) missingFields.push("store_id");
+        if (!offer.partner_id) missingFields.push("partner_id");
+
+        if (missingFields.length > 0) {
+            const debugPayload = {
+                offerId,
+                userId,
+                step: "offer_missing_fields",
+                supabaseError: {
+                    code: "MISSING_OFFER_FIELDS",
+                    message: `Missing required offer fields: ${missingFields.join(", ")}`,
+                    details: null,
+                    hint: null
+                },
+                offerSnapshot
+            };
+            return {
+                success: false,
+                error: "ADD_TO_CART_FAILED",
+                ...(isDev ? { debug: debugPayload } : {})
+            };
+        }
+
+        // Check if item exists for this user + offer
+        const { data: existingItem, error: existingError } = await supabase
             .from("cart_items")
-            .insert({
-                user_id: userId,
-                offer_id: offerId,
-                quantity: safeQuantity
+            .select("quantity")
+            .eq("offer_id", offerId)
+            .eq("user_id", userId)
+            .maybeSingle();
+
+        console.log("[cart] addToCart existing item", {
+            offerId,
+            userId,
+            existingItem,
+            existingError
+        });
+
+        if (existingError) {
+            logSupabaseError("check existing cart item", existingError);
+            const debugPayload = {
+                offerId,
+                userId,
+                step: "select_existing",
+                supabaseError: buildSupabaseDebug(existingError)
+            };
+            return {
+                success: false,
+                error: "ADD_TO_CART_FAILED",
+                ...(isDev ? { debug: debugPayload } : {})
+            };
+        }
+
+        if (existingItem) {
+            const existingQty = Number(existingItem.quantity ?? 0);
+            const { error: updateError } = await supabase
+                .from("cart_items")
+                .update({
+                    quantity: existingQty + safeQuantity,
+                    unit_price: resolvedUnitPrice,
+                    currency: offer.currency,
+                    unit: offer.unit,
+                    store_id: offer.store_id,
+                    partner_id: offer.partner_id
+                })
+                .eq("offer_id", offerId)
+                .eq("user_id", userId);
+
+            console.log("[cart] addToCart update", {
+                offerId,
+                userId,
+                updateError
             });
 
-        if (insertError) {
-            logSupabaseError("insert cart item", insertError);
-            return { success: false, error: "ADD_TO_CART_FAILED" };
-        }
-    }
+            if (updateError) {
+                logSupabaseError("update cart quantity", updateError);
+                const debugPayload = {
+                    offerId,
+                    userId,
+                    step: "update_existing",
+                    supabaseError: buildSupabaseDebug(updateError),
+                    offerSnapshot
+                };
+                return {
+                    success: false,
+                    error: "ADD_TO_CART_FAILED",
+                    ...(isDev ? { debug: debugPayload } : {})
+                };
+            }
+        } else {
+            const { error: insertError } = await supabase
+                .from("cart_items")
+                .insert({
+                    user_id: userId,
+                    offer_id: offerId,
+                    quantity: safeQuantity,
+                    unit_price: resolvedUnitPrice,
+                    currency: offer.currency,
+                    unit: offer.unit,
+                    store_id: offer.store_id,
+                    partner_id: offer.partner_id
+                });
 
-    revalidatePath('/cart');
-    return { success: true };
+            console.log("[cart] addToCart insert", {
+                offerId,
+                userId,
+                insertError
+            });
+
+            if (insertError) {
+                logSupabaseError("insert cart item", insertError);
+                const debugPayload = {
+                    offerId,
+                    userId,
+                    step: "insert_new",
+                    supabaseError: buildSupabaseDebug(insertError),
+                    offerSnapshot
+                };
+                return {
+                    success: false,
+                    error: "ADD_TO_CART_FAILED",
+                    ...(isDev ? { debug: debugPayload } : {})
+                };
+            }
+        }
+
+        revalidatePath('/cart');
+        return { success: true };
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.error("[cart] addToCart failed", { message });
+        const isDev = process.env.NODE_ENV !== "production";
+        const debugPayload = {
+            offerId,
+            userId: resolvedUserId,
+            step: "exception"
+        };
+        return {
+            success: false,
+            error: "ADD_TO_CART_FAILED",
+            ...(isDev ? { debug: debugPayload } : {})
+        };
+    }
 }
 
 export async function removeFromCart(offerId: string): Promise<CartActionResult> {
