@@ -1,6 +1,7 @@
 import Link from 'next/link';
-import { Package, ShoppingCart } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 import type { Product } from '@/app/lib/types';
+import { getProductImage } from '@/app/lib/imageUtils';
 // Note: We might need to extend the type locally or ensure the global type has everything we need.
 // For now assuming the standard Product type is sufficient or we cast the DB result.
 
@@ -10,25 +11,19 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
     // Determine image to show
-    const imageUrl = product.image_url || product.image;
+    const imageUrl = getProductImage(product);
     const companyName = product.profiles?.company_name?.trim() || "";
 
     return (
         <div className="bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full group">
             {/* Image */}
             <div className="relative aspect-square bg-slate-50 overflow-hidden">
-                {imageUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                        src={imageUrl}
-                        alt={product.name}
-                        className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300"
-                    />
-                ) : (
-                    <div className="w-full h-full flex items-center justify-center text-slate-300">
-                        <Package size={48} />
-                    </div>
-                )}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                    src={imageUrl}
+                    alt={product.name}
+                    className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300"
+                />
 
                 {/* Partner Badge */}
                 {companyName && (

@@ -66,12 +66,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         try {
             const result = await addToCartAction(offerId, quantity, options?.debug);
             if (!result.success) {
-                if (!options?.silent) {
-                    if (result.error === "LOGIN_REQUIRED") {
-                        toast.error("Logi sisse, et lisada ostukorvi.");
-                    } else {
-                        toast.error("Something went wrong.");
-                    }
+                if (result.debug?.supabaseError) {
+                    const { code, message, details, hint } = result.debug.supabaseError;
+                    console.error("[cart] addToCart error", {
+                        code,
+                        message,
+                        details,
+                        hint,
+                        step: result.debug?.step
+                    });
+                } else {
+                    console.error("[cart] addToCart failed", result);
+                }
+                if (result.error === "LOGIN_REQUIRED") {
+                    toast.error("Logi sisse, et lisada ostukorvi.");
+                } else {
+                    toast.error("Something went wrong.");
                 }
                 return result;
             }

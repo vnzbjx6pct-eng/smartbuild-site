@@ -51,6 +51,16 @@ const buildSupabaseDebug = (
     };
 };
 
+// DB check (Supabase SQL editor):
+// select column_name, is_nullable, data_type
+// from information_schema.columns
+// where table_schema = 'public' and table_name = 'cart_items'
+// order by ordinal_position;
+// Manual test plan:
+// 1) Login, open product catalog, click "Lisa korvi".
+// 2) Confirm cart sidebar opens and count increments.
+// 3) Verify cart_items row has non-null unit_price/currency/unit/etc.
+
 const getUserId = async (
     supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>
 ): Promise<string | null> => {
@@ -97,7 +107,6 @@ export async function getCart(): Promise<Cart> {
             price,
             stock:stock_qty,
             unit,
-            name,
             image_url,
             store_id,
             store_name:store,
@@ -313,7 +322,7 @@ export async function addToCart(
 
         const { data: offer, error: offerError } = await supabase
             .from("offers")
-            .select("id, price, unit_price, currency, unit, store_id, partner_id")
+            .select("*")
             .eq("id", offerId)
             .maybeSingle();
 
@@ -341,20 +350,14 @@ export async function addToCart(
             };
         }
 
-        const resolvedUnitPrice = offer.unit_price ?? offer.price ?? null;
+        const resolvedUnitPrice = offer.price ?? null;
         const offerSnapshot = {
             price: offer.price ?? null,
-            currency: offer.currency ?? null,
-            unit: offer.unit ?? null,
             unit_price: resolvedUnitPrice
         };
 
         const missingFields: string[] = [];
         if (resolvedUnitPrice === null || resolvedUnitPrice === undefined) missingFields.push("unit_price");
-        if (!offer.currency) missingFields.push("currency");
-        if (!offer.unit) missingFields.push("unit");
-        if (!offer.store_id) missingFields.push("store_id");
-        if (!offer.partner_id) missingFields.push("partner_id");
 
         if (missingFields.length > 0) {
             const debugPayload = {
@@ -412,11 +415,7 @@ export async function addToCart(
                 .from("cart_items")
                 .update({
                     quantity: existingQty + safeQuantity,
-                    unit_price: resolvedUnitPrice,
-                    currency: offer.currency,
-                    unit: offer.unit,
-                    store_id: offer.store_id,
-                    partner_id: offer.partner_id
+                    unit_price: resolvedUnitPrice
                 })
                 .eq("offer_id", offerId)
                 .eq("user_id", userId);
@@ -449,11 +448,7 @@ export async function addToCart(
                     user_id: userId,
                     offer_id: offerId,
                     quantity: safeQuantity,
-                    unit_price: resolvedUnitPrice,
-                    currency: offer.currency,
-                    unit: offer.unit,
-                    store_id: offer.store_id,
-                    partner_id: offer.partner_id
+                    unit_price: resolvedUnitPrice
                 });
 
             console.log("[cart] addToCart insert", {

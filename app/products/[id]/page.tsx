@@ -2,12 +2,12 @@ import { createSupabaseServerClient } from '@/app/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import ProductDetailClient from './ProductDetailClient';
 import type { Metadata } from 'next';
+import { getProductImage } from '@/app/lib/imageUtils';
 
 export const revalidate = 60;
 
 type PartnerOffer = {
     id: string;
-    name?: string | null;
     product_id?: string | null;
     price: number | null;
     stock: number | null;
@@ -37,12 +37,13 @@ export async function generateMetadata({
         .eq('id', id)
         .eq('is_active', true)
         .single();
+    const metaImage = getProductImage(product ?? undefined);
 
     return {
         title: product ? `${product.name} - SmartBuild` : 'Toode puudub',
         description: product?.description ? product.description.substring(0, 160) : 'Ehitusmaterjalid parima hinnaga.',
         openGraph: {
-            images: product?.image_url ? [product.image_url] : [],
+            images: [metaImage],
         },
     };
 }
@@ -74,29 +75,36 @@ export default async function ProductDetailPage({
     }
 
     // 2. Fetch Partner Offers for Comparison
-    let offersQuery = supabase
-        .from("offers")
-        .select("id, name, product_id, price, stock, unit, sku, ean, store_id, store_name");
+    let partnerOffers: PartnerOffer[] = [];
+    let offersErrorMessage: string | null = null;
 
-    const orMatches: string[] = [];
-    if (product.sku) orMatches.push(`sku.eq.${product.sku}`);
-    if (product.ean) orMatches.push(`ean.eq.${product.ean}`);
+    try {
+        let offersQuery = supabase
+            .from("offers")
+            .select("id, product_id, price, stock:stock_qty, unit, store_id, store_name:store");
 
-    offersQuery = orMatches.length > 0
-        ? offersQuery.or(`product_id.eq.${product.id},${orMatches.join(",")}`)
-        : offersQuery.eq("product_id", product.id);
+        offersQuery = offersQuery.eq("product_id", product.id);
 
-    const { data: partnerOffers, error: offersError } = await offersQuery;
-    const offersErrorMessage = offersError
-        ? "Partnerite pakkumiste laadimine ebaõnnestus. Proovi mõne hetke pärast uuesti."
-        : null;
-
-    if (offersError) {
+        const { data, error: offersError } = await offersQuery;
+        if (offersError) {
+            offersErrorMessage = "Partnerite pakkumiste laadimine ebaõnnestus. Proovi mõne hetke pärast uuesti.";
+            console.error("[product] offers query failed", {
+                productId: product.id,
+                code: offersError.code ?? undefined,
+                message: offersError.message ?? undefined,
+            });
+            partnerOffers = [];
+        } else {
+            partnerOffers = (data as PartnerOffer[] | null) ?? [];
+        }
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        offersErrorMessage = "Partnerite pakkumiste laadimine ebaõnnestus. Proovi mõne hetke pärast uuesti.";
         console.error("[product] offers query failed", {
             productId: product.id,
-            code: offersError.code ?? undefined,
-            message: offersError.message ?? undefined,
+            message,
         });
+        partnerOffers = [];
     }
 
     const offerStoreIds = Array.from(
@@ -152,8 +160,8 @@ export default async function ProductDetailPage({
         ? Math.round((prices.reduce((sum, price) => sum + price, 0) / prices.length) * 100) / 100
         : null;
 
-    const hasAnyAvailableStock = offers.some((offer) => offer.stock === null || offer.stock === undefined || offer.stock > 0);
-    const productStockIsAvailable = product?.stock === null || product?.stock === undefined || product?.stock !== 0;
+    const hasAnyAvailableStock = offers.some((offer) => offer.stock !== 0);
+    const productStockIsAvailable = product?.stock !== 0;
     const isAvailable = offers.length > 0 ? hasAnyAvailableStock : productStockIsAvailable;
 
     console.log("[product] offer summary", {
@@ -182,7 +190,7 @@ export default async function ProductDetailPage({
         '@type': 'Product',
         name: product.name,
         description: product.description,
-        image: product.image_url ? [product.image_url] : [],
+        image: [getProductImage(product)],
         offers: {
             '@type': 'Offer',
             price: bestPrice,

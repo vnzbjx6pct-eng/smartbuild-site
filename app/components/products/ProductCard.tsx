@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ShoppingCart } from 'lucide-react';
 import type { Product } from '@/app/types';
+import { getProductImage } from '@/app/lib/imageUtils';
 
 interface ProductCardProps {
     product: Product;
@@ -8,22 +9,17 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
     const companyName = product.profiles?.company_name?.trim() || "";
+    const imageUrl = getProductImage(product);
 
     return (
         <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden hover:shadow-lg transition-all group h-full flex flex-col">
             <Link href={`/products/${product.id}`} className="block relative aspect-square bg-slate-900/60 overflow-hidden">
-                {product.image_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                        src={product.image_url}
-                        alt={product.name}
-                        className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300"
-                    />
-                ) : (
-                    <div className="w-full h-full flex items-center justify-center text-slate-500">
-                        <span className="text-sm">Pilt puudub</span>
-                    </div>
-                )}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                    src={imageUrl}
+                    alt={product.name}
+                    className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300"
+                />
                 <span className="absolute top-2 right-2 bg-emerald-600 text-white text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full shadow-sm">
                     Võrdle hindu
                 </span>

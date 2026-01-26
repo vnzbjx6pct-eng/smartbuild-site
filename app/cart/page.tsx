@@ -3,6 +3,7 @@
 import { useCart } from "@/app/components/cart/CartProvider";
 import { ShoppingBag, ArrowRight, Trash2, ShieldCheck, Truck, CreditCard } from "lucide-react";
 import Link from "next/link";
+import { getProductImage } from "@/app/lib/imageUtils";
 
 export default function CartPage() {
     const { cart, removeFromCart, updateQuantity, clearCart } = useCart();
@@ -51,12 +52,12 @@ export default function CartPage() {
                                 {cart.items.map((item) => (
                                     <div key={item.id} className="p-6 flex flex-col sm:flex-row gap-6 items-center sm:items-start group hover:bg-slate-50 transition-colors">
                                         <div className="w-24 h-24 bg-white rounded-xl border border-slate-200 shrink-0 overflow-hidden flex items-center justify-center p-2">
-                                            {item.product.image_url ? (
-                                                // eslint-disable-next-line @next/next/no-img-element
-                                                <img src={item.product.image_url} alt={item.product.name} className="w-full h-full object-contain" />
-                                            ) : (
-                                                <ShoppingBag size={32} className="text-slate-300" />
-                                            )}
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                            <img
+                                                src={getProductImage(item.product)}
+                                                alt={item.product.name}
+                                                className="w-full h-full object-contain"
+                                            />
                                         </div>
 
                                         <div className="flex-1 min-w-0 flex flex-col sm:flex-row justify-between w-full gap-4">

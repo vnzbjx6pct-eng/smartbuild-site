@@ -1,20 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { ShoppingCart, Truck, ShieldCheck, ArrowRight } from 'lucide-react';
 import { toast } from "react-hot-toast";
 
 import type { Product } from "@/app/types";
 import { useCart } from "@/app/components/cart/CartProvider";
+import { getProductImage } from "@/app/lib/imageUtils";
 
 // Helper type for similar products (subset of Product)
 type SimilarProduct = Pick<Product, 'id' | 'name' | 'price' | 'image_url' | 'category'>;
 
 type PartnerOffer = {
     id: string;
-    name?: string | null;
     price: number | null;
     stock: number | null;
     unit: string | null;
@@ -40,32 +39,16 @@ interface ProductDetailClientProps {
 
 export default function ProductDetailClient({ product, partnerOffers, bestOfferId, minPrice, maxPrice, avgPrice, isAvailable, offersErrorMessage, similarProducts }: ProductDetailClientProps) {
     const { addToCart } = useCart();
-    const router = useRouter();
-
-    if (!product) return null;
     const sortedOffers = [...(partnerOffers || [])].sort((a, b) => {
         const aPrice = typeof a.price === "number" ? a.price : Number.POSITIVE_INFINITY;
         const bPrice = typeof b.price === "number" ? b.price : Number.POSITIVE_INFINITY;
         return aPrice - bPrice;
     });
-    const isOfferOutOfStock = (offer?: PartnerOffer | null) => Boolean(offer && typeof offer.stock === 'number' && offer.stock === 0);
+    const isOfferOutOfStock = (offer?: PartnerOffer | null) => Boolean(offer && offer.stock === 0);
     const bestOfferCandidate = sortedOffers.find((offer) => offer.id === bestOfferId) || sortedOffers[0] || null;
     const primaryOffer = bestOfferCandidate && isOfferOutOfStock(bestOfferCandidate)
         ? (sortedOffers.find((offer) => !isOfferOutOfStock(offer)) || bestOfferCandidate)
         : bestOfferCandidate;
-    const companyName = primaryOffer?.store?.name?.trim()
-        || primaryOffer?.store?.brand_name?.trim()
-        || primaryOffer?.store_name?.trim()
-        || product.profiles?.company_name?.trim()
-        || "";
-    const companyInitials = companyName ? companyName.substring(0, 2).toUpperCase() : "?";
-    const displayPrice = typeof primaryOffer?.price === "number" ? primaryOffer.price : product.price;
-    const displayUnit = primaryOffer?.unit || product.unit;
-    const hasPartnerInfo = Boolean(primaryOffer?.store || primaryOffer?.store_name || product.profiles);
-    const displayStockCount = typeof primaryOffer?.stock === 'number' && primaryOffer.stock > 0 ? primaryOffer.stock : null;
-
-    const formatPrice = (value: number | null) => value === null ? "—" : `${value.toFixed(2)} €`;
-    const shouldShowOffersNotice = Boolean(offersErrorMessage) || sortedOffers.length === 0;
 
     useEffect(() => {
         console.log("[product] offer debug", {
@@ -76,6 +59,24 @@ export default function ProductDetailClient({ product, partnerOffers, bestOfferI
             isAvailable,
         });
     }, [isAvailable, primaryOffer, sortedOffers.length]);
+
+    if (!product) return null;
+
+    const companyName = primaryOffer?.store?.name?.trim()
+        || primaryOffer?.store?.brand_name?.trim()
+        || primaryOffer?.store_name?.trim()
+        || product.profiles?.company_name?.trim()
+        || "";
+    const imageUrl = getProductImage(product);
+    const companyInitials = companyName ? companyName.substring(0, 2).toUpperCase() : "?";
+    const displayPrice = typeof primaryOffer?.price === "number" ? primaryOffer.price : product.price;
+    const displayUnit = primaryOffer?.unit || product.unit;
+    const hasPartnerInfo = Boolean(primaryOffer?.store || primaryOffer?.store_name || product.profiles);
+    const displayStockCount = typeof primaryOffer?.stock === 'number' && primaryOffer.stock > 0 ? primaryOffer.stock : null;
+
+    const formatPrice = (value: number | null) => value === null ? "—" : `${value.toFixed(2)} €`;
+    const shouldShowOffersNotice = Boolean(offersErrorMessage) || sortedOffers.length === 0;
+    const isDev = process.env.NODE_ENV !== "production";
     const handleAddOffer = async (offerId?: string | null) => {
         if (!offerId) {
             toast.error("Pakkumine puudub.");
@@ -98,20 +99,17 @@ export default function ProductDetailClient({ product, partnerOffers, bestOfferI
         }
 
         if (result.error === "LOGIN_REQUIRED") {
-            toast.custom((t) => (
-                <div className="bg-white text-slate-900 px-4 py-3 rounded-xl shadow-lg border border-slate-100 flex items-center gap-3">
-                    <span className="text-sm">Logi sisse, et lisada ostukorvi</span>
-                    <button
-                        onClick={() => {
-                            toast.dismiss(t.id);
-                            router.push("/account");
-                        }}
-                        className="text-sm font-semibold text-emerald-600 hover:text-emerald-700"
-                    >
-                        Logi sisse
-                    </button>
-                </div>
-            ));
+            toast.error("Logi sisse");
+            return;
+        }
+
+        if (result.error === "INVALID_OFFER") {
+            toast.error("Offer puudub");
+            return;
+        }
+
+        if (result.error === "ADD_TO_CART_FAILED" && isDev && result.debug?.supabaseError?.message) {
+            toast.error(result.debug.supabaseError.message);
             return;
         }
 
@@ -134,19 +132,12 @@ export default function ProductDetailClient({ product, partnerOffers, bestOfferI
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
                     {/* Image Gallery */}
                     <div className="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden p-8 flex items-center justify-center aspect-square lg:aspect-auto h-full max-h-[600px]">
-                        {product.image_url ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                                src={product.image_url}
-                                alt={product.name}
-                                className="w-full h-full object-contain max-w-md max-h-[500px]"
-                            />
-                        ) : (
-                            <div className="text-slate-400 flex flex-col items-center">
-                                <ShieldCheck size={64} className="mb-2 opacity-20" />
-                                <span>Pilt puudub</span>
-                            </div>
-                        )}
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                            src={imageUrl}
+                            alt={product.name}
+                            className="w-full h-full object-contain max-w-md max-h-[500px]"
+                        />
                     </div>
 
                     {/* Product Info */}
@@ -336,14 +327,12 @@ export default function ProductDetailClient({ product, partnerOffers, bestOfferI
                             {similarProducts.map((prod) => (
                                 <Link href={`/products/${prod.id}`} key={prod.id} className="group bg-slate-800 border border-slate-700 rounded-xl overflow-hidden hover:shadow-md transition-all hover:border-emerald-400">
                                     <div className="aspect-square bg-slate-900/40 p-6 flex items-center justify-center relative overflow-hidden">
-                                        {prod.image_url ? (
-                                            // eslint-disable-next-line @next/next/no-img-element
-                                            <img src={prod.image_url} alt={prod.name} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
-                                        ) : (
-                                            <div className="text-slate-500">
-                                                <ShieldCheck size={40} />
-                                            </div>
-                                        )}
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                        <img
+                                            src={getProductImage(prod)}
+                                            alt={prod.name}
+                                            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                                        />
                                     </div>
                                     <div className="p-4">
                                         <h3 className="font-medium text-slate-100 mb-1 truncate group-hover:text-emerald-300 transition-colors">{prod.name}</h3>

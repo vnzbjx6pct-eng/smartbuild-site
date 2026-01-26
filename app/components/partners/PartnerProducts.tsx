@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Product } from "@/app/lib/types";
 import { Search } from "lucide-react";
+import { getProductImage } from "@/app/lib/imageUtils";
 
 interface PartnerProductsProps {
     products: any[]; // Using any[] temporarily as the join structure might differ slightly from strict Product type
@@ -60,13 +61,12 @@ export function PartnerProducts({ products }: PartnerProductsProps) {
                     // Ideally we should map to the standard Product type, but for now passing as is if compatible
                     <div key={product.id} className="group bg-white rounded-2xl border border-slate-100 p-4 shadow-sm hover:shadow-md transition-all">
                         <div className="aspect-square bg-slate-50 rounded-xl mb-4 overflow-hidden relative">
-                            {product.image_url ? (
-                                <img src={product.image_url} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center text-slate-300">
-                                    No Image
-                                </div>
-                            )}
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                                src={getProductImage(product)}
+                                alt={product.name}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
                         </div>
                         <div>
                             <div className="text-xs text-slate-500 mb-1">{product.category}</div>

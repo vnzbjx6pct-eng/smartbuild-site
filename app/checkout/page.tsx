@@ -5,6 +5,7 @@ import { ArrowLeft, Check, Lock } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { getProductImage } from "@/app/lib/imageUtils";
 
 export default function CheckoutPage() {
     const { cart, isLoading } = useCart();
@@ -95,7 +96,11 @@ export default function CheckoutPage() {
                                     <div key={item.id} className="flex gap-3 text-sm">
                                         <div className="w-12 h-12 bg-slate-50 rounded-lg border border-slate-100 shrink-0 flex items-center justify-center p-1">
                                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                                            {item.product.image_url && <img src={item.product.image_url} alt="" className="w-full h-full object-contain" />}
+                                            <img
+                                                src={getProductImage(item.product)}
+                                                alt={item.product.name}
+                                                className="w-full h-full object-contain"
+                                            />
                                         </div>
                                         <div className="flex-1">
                                             <div className="font-medium text-slate-900 line-clamp-1">{item.product.name}</div>
