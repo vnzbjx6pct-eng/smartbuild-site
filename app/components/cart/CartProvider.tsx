@@ -5,6 +5,30 @@ import type { Cart, CartItem } from '@/app/types';
 import { getCart, addToCart as addToCartAction, removeFromCart as removeFromCartAction, updateCartItemQuantity as updateCartItemQuantityAction, clearCart as clearCartAction } from '@/app/actions/cart';
 import { toast } from 'react-hot-toast';
 
+type CartActionDebug = {
+    offerId?: string | null;
+    userId?: string | null;
+    step?: string;
+    supabaseError?: {
+        code?: string | null;
+        message?: string | null;
+        details?: string | null;
+        hint?: string | null;
+    };
+    offerSnapshot?: {
+        price?: number | string | null;
+        unit_price?: number | string | null;
+        currency?: string | null;
+        unit?: string | null;
+    };
+};
+
+type CartActionResult = {
+    success: boolean;
+    error?: string;
+    debug?: CartActionDebug;
+};
+
 interface CartContextType {
     cart: Cart | null;
     isLoading: boolean;
@@ -19,7 +43,7 @@ interface CartContextType {
             offersLength?: number;
             isAvailable?: boolean;
         };
-    }) => Promise<{ success: boolean; error?: string }>;
+    }) => Promise<CartActionResult>;
     removeFromCart: (offerId: string) => Promise<void>;
     updateQuantity: (offerId: string, quantity: number) => Promise<void>;
     clearCart: () => Promise<void>;
